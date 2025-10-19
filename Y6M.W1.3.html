@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <title>Y6M.W1.3 – Fraction Pizza</title>
   <link rel="stylesheet" href="shared-styles.css">
+  <link rel="stylesheet" href="loading-component.css">
+  <link rel="stylesheet" href="auth-component.css">
   <style>
     /* ONLY game-specific styles - NO header/footer/auth styles */
     .feedback-msg {
@@ -264,11 +266,46 @@
   <!-- Authentication Modal -->
   <div id="authModal">
     <div id="authModalContent">
-      <h2>Welcome to Jando EDU!</h2>
-      <p>Please enter your unique student code to access your games and track your progress.</p>
-      <input type="text" id="studentCodeInput" placeholder="Enter your student code" maxlength="20">
-      <div id="authError" style="display: none; color: var(--accent-red); margin: 0.5rem 0; font-size: 0.875rem;"></div>
-      <button id="authLoginBtn" onclick="jandoAuth.authenticateUser()">Login</button>
+      <div class="auth-header">
+        <img src="https://i.imgur.com/QIdMEsB.png" alt="Jando EDU Logo" class="auth-logo">
+        <h2>Welcome to Jando EDU!</h2>
+        <p>Your learning adventure starts here</p>
+      </div>
+      
+      <div class="auth-body">
+        <div class="auth-input-group">
+          <label class="auth-input-label" for="studentCodeInput">Student Access Code</label>
+          <input type="text" id="studentCodeInput" placeholder="Enter your unique student code" maxlength="20">
+        </div>
+        
+        <div id="authError" style="display: none;"></div>
+        
+        <button id="authLoginBtn" onclick="jandoAuth.authenticateUser()">
+          Login
+        </button>
+      </div>
+
+      <div class="auth-features">
+        <h3>What's waiting for you:</h3>
+        <ul class="auth-feature-list">
+          <li>
+            <div class="auth-feature-icon">🎮</div>
+            Interactive games and quizzes
+          </li>
+          <li>
+            <div class="auth-feature-icon">📚</div>
+            Personalized learning modules
+          </li>
+          <li>
+            <div class="auth-feature-icon">🏆</div>
+            Collect rewards and track progress
+          </li>
+          <li>
+            <div class="auth-feature-icon">📊</div>
+            Real-time performance insights
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 

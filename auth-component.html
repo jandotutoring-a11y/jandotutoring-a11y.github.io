@@ -1,0 +1,45 @@
+<!-- Jando EDU Authentication Component HTML Template -->
+<div id="authModal">
+  <div id="authModalContent">
+    <div class="auth-header">
+      <img src="https://i.imgur.com/QIdMEsB.png" alt="Jando EDU Logo" class="auth-logo">
+      <h2>Welcome to Jando EDU!</h2>
+      <p>Your learning adventure starts here</p>
+    </div>
+    
+    <div class="auth-body">
+      <div class="auth-input-group">
+        <label class="auth-input-label" for="studentCodeInput">Student Access Code</label>
+        <input type="text" id="studentCodeInput" placeholder="Enter your unique student code" maxlength="20">
+      </div>
+      
+      <div id="authError" style="display: none;"></div>
+      
+      <button id="authLoginBtn" onclick="jandoAuth.authenticateUser()">
+        Login
+      </button>
+    </div>
+
+    <div class="auth-features">
+      <h3>What's waiting for you:</h3>
+      <ul class="auth-feature-list">
+        <li>
+          <div class="auth-feature-icon">🎮</div>
+          Interactive games and quizzes
+        </li>
+        <li>
+          <div class="auth-feature-icon">📚</div>
+          Personalized learning modules
+        </li>
+        <li>
+          <div class="auth-feature-icon">🏆</div>
+          Collect rewards and track progress
+        </li>
+        <li>
+          <div class="auth-feature-icon">📊</div>
+          Real-time performance insights
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

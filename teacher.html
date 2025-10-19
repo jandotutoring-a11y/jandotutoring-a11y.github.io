@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Teacher Dashboard – Jando Tutoring</title>
   <link rel="stylesheet" href="shared-styles.css">
+  <link rel="stylesheet" href="auth-component.css">
   <style>
     /* Modern Teacher Dashboard Styles */
     body {
@@ -233,11 +234,46 @@
   <!-- Authentication Modal -->
   <div id="authModal">
     <div id="authModalContent">
-      <h2>Welcome to Jando EDU!</h2>
-      <p>Please enter your unique teacher code to access the dashboard.</p>
-      <input type="text" id="studentCodeInput" placeholder="Enter your teacher code" maxlength="20">
-      <div id="authError" style="display: none; color: var(--accent-red); margin: 0.5rem 0; font-size: 0.875rem;"></div>
-      <button id="authLoginBtn" onclick="jandoAuth.authenticateUser()">Login</button>
+      <div class="auth-header">
+        <img src="https://i.imgur.com/QIdMEsB.png" alt="Jando EDU Logo" class="auth-logo">
+        <h2>Welcome to Jando EDU!</h2>
+        <p>Teacher Access Portal</p>
+      </div>
+      
+      <div class="auth-body">
+        <div class="auth-input-group">
+          <label class="auth-input-label" for="studentCodeInput">Teacher Access Code</label>
+          <input type="text" id="studentCodeInput" placeholder="Enter your teacher code" maxlength="20">
+        </div>
+        
+        <div id="authError" style="display: none;"></div>
+        
+        <button id="authLoginBtn" onclick="jandoAuth.authenticateUser()">
+          Teacher Login
+        </button>
+      </div>
+
+      <div class="auth-features">
+        <h3>Teacher Dashboard Features:</h3>
+        <ul class="auth-feature-list">
+          <li>
+            <div class="auth-feature-icon">📊</div>
+            Student progress analytics
+          </li>
+          <li>
+            <div class="auth-feature-icon">📝</div>
+            Assessment results tracking
+          </li>
+          <li>
+            <div class="auth-feature-icon">🎯</div>
+            Performance insights & reports
+          </li>
+          <li>
+            <div class="auth-feature-icon">👥</div>
+            Class management tools
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 
