@@ -1,0 +1,471 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Y6M.W1.2 – Bubble Pop Game</title>
+  <link rel="stylesheet" href="shared-styles.css">
+  <style>
+    /* All common styles are now in shared-styles.css */
+    /* This file only contains page-specific overrides if needed */
+    #startBtn:hover {
+  background: #d14a1f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(225, 92, 49, 0.3);
+}
+  </style>
+</head>
+<body>
+  <!-- Authentication Modal -->
+  <div id="authModal">
+    <div id="authModalContent">
+      <h2>Welcome to Jando EDU!</h2>
+      <p>Please enter your unique student code to access your games and track your progress.</p>
+      <input type="text" id="studentCodeInput" placeholder="Enter your student code" maxlength="20">
+      <div id="authError" style="display: none; color: var(--accent-red); margin: 0.5rem 0; font-size: 0.875rem;"></div>
+      <button id="authLoginBtn" onclick="jandoAuth.authenticateUser()">Login</button>
+    </div>
+  </div>
+
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <img src="https://i.imgur.com/QIdMEsB.png" alt="Jando EDU Logo" class="logo">
+      </div>
+      <div class="header-right">
+        <span id="userGreeting" style="display: none;"></span>
+        <div class="menu-container">
+          <button id="menuBtn" class="menu-button">☰ Menu</button>
+          <div id="menuDropdown" class="menu-dropdown">
+            <a href="index.html" class="menu-item">Home</a>
+            <a href="learning-hub.html" class="menu-item">Learning Hub</a>
+            <a href="games.html" class="menu-item">Games</a>
+            <a href="reward.html" class="menu-item">My Rewards</a>
+            <button class="menu-logout" onclick="jandoAuth.logout()">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div id="loading" style="display: none;">
+      <img src="https://i.imgur.com/KpZ3dFx.gif" alt="Loading...">
+      <span>Loading, please wait...</span>
+    </div>
+
+    <!-- Instructions Section -->
+    <div id="instructionsArea" style="text-align: center; max-width: 600px; margin: 2rem auto;">
+      <h2 id="greeting" style="color: var(--dark-blue); margin-bottom: 1.5rem;"></h2>
+      <div style="background: var(--white); padding: 2rem; border-radius: 1rem; box-shadow: var(--shadow-lg); margin-bottom: 2rem;">
+        <h3 style="color: var(--orange); margin-bottom: 1rem;">🎯 How to Play</h3>
+        <ul style="text-align: left; color: var(--dark-blue); font-size: 1.1rem; line-height: 1.6;">
+          <li>Answer math questions by clicking the correct bubble</li>
+          <li>Bubbles will float up - click before they disappear!</li>
+          <li>You have 3 lives ❤️❤️❤️</li>
+          <li>Get 4 out of 5 correct to earn a reward! 🎁</li>
+        </ul>
+      </div>
+      <button id="startBtn" onclick="startCountdown()" style="
+        background: var(--orange);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      ">🚀 Start Game</button>
+    </div>
+
+    <div id="countdown" style="display: none;"></div> <!-- ✅ Countdown here -->
+
+    <div id="question" style="display:none;"></div>
+    
+    <div class="game-stats" style="display:none;">
+      <div id="lives">Lives: ❤️❤️❤️</div>
+      <div id="score">Score: 0</div>
+    </div>
+
+    <div id="gameArea"></div>
+
+    <div id="feedback"></div>
+    <div id="result"></div>
+    <div id="uploadStatus"></div>
+  </div>
+
+  <!-- Reward Modal Popup -->
+  <div id="rewardModal">
+    <div id="rewardModalContent">
+      <span class="closeModal" onclick="closeRewardModal()">&times;</span>
+      <h2 style="color: var(--dark-blue); margin-bottom: 10px;">🎉 Congratulations! 🎉</h2>
+      <p id="rewardMessage" style="font-size: 20px; margin-bottom: 20px;">Click the present to reveal your reward!</p>
+      <div id="rewardDisplay" onclick="revealReward()" style="cursor: pointer;">🎁</div>
+      <div style="display: none; text-align: center; margin-top: 20px;" id="rewardButtons">
+        <button class="modalButton" onclick="closeRewardModal()" id="closeRewardBtn" style="margin: 0 0.5rem;">Awesome!</button>
+        <button class="modalButton" onclick="window.location.href='games.html'" style="background: var(--orange); margin: 0 0.5rem;">🏠 Return to Games</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Modal Popup -->
+<div id="loadingModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+  <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 1rem; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+    <img src="https://i.imgur.com/KpZ3dFx.gif" alt="Loading..." style="width: 60px; height: 60px; margin-bottom: 1rem;">
+    <h3 style="color: var(--dark-blue); margin-bottom: 0.5rem;">Uploading Results...</h3>
+    <p style="color: var(--gray-600); font-size: 0.9rem;">Please wait while we save your progress</p>
+  </div>
+</div>
+
+  <script src="auth.js"></script>
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzwNZGb_nRFF9t4lLdJdbII1kuDKhsiy4_liBxOe3pNc6rWP7swfem33C_ALT3OWQ9GoQ/exec"; 
+    const sheetName = "Y6M.W1.2"; 
+    const gameName = "Y6M.W1.2 Bubble Pop";
+
+    let code = "";
+    let studentName = "";
+    let score = 0;
+    let lives = 3;
+    let currentQ = 0;
+    let totalQuestions = 5;
+    let responses = [];
+    let answered = false;
+
+    const questions = [
+      {q:"What is 6 + 4?", options:[8,9,10,11], answer:10},
+      {q:"What is 3 × 4?", options:[10,11,12,13], answer:12},
+      {q:"What is 15 - 7?", options:[6,7,8,9], answer:8},
+      {q:"What is 20 ÷ 4?", options:[4,5,6,7], answer:5},
+      {q:"What is 2 + 2 + 2?", options:[4,5,6,7], answer:6}
+    ];
+
+    const animals = ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮",
+      "🐷","🐸","🐵","🐔","🐧","🐦","🐤","🦆","🦅","🦉","🐴","🦄","🐝","🐛","🦋",
+      "🐌","🐞","🐢","🐍","🦎","🦖","🦕","🐙","🦑","🦐","🦞","🦀","🐡","🐠","🐟",
+      "🐬","🐳","🐋","🦈","🐊","🐅","🐆","🦓","🦍","🦧","🐘","🦛","🦏","🐪","🐫",
+      "🦒","🦘","🐃","🐂","🐄","🐎","🐖","🐏","🐑","🐐","🦌","🐕","🐩","🐈","🐓",
+      "🦃","🕊️","🐇","🐁","🐀","🐿️","🦔"];
+
+    // Initialize game when user is authenticated
+    document.addEventListener("DOMContentLoaded", () => {
+      // Wait for auth system to initialize
+      const checkAuth = setInterval(() => {
+        if (window.jandoAuth && jandoAuth.isAuthenticated()) {
+          const user = jandoAuth.getCurrentUser();
+          
+          // Check if user has access to this year level (Year 6 game)
+          const gameYearLevel = "6"; // This is a Year 6 game
+          const userYear = user.yearLevel || user.year || user.Year || user['Year Level'] || user.grade || user.Grade;
+          
+          if (userYear) {
+            const userYearNumber = userYear.toString().replace(/[^0-9]/g, '');
+            console.log(`User Year: ${userYearNumber}, Game Year: ${gameYearLevel}`);
+            
+            if (userYearNumber !== gameYearLevel) {
+              // User doesn't have access to this year level
+              showAccessDeniedMessage(userYearNumber, gameYearLevel);
+              clearInterval(checkAuth);
+              return;
+            }
+          }
+          
+          // User has access - proceed normally
+          code = user.code;
+          studentName = user.name;
+          startGame();
+          clearInterval(checkAuth);
+        }
+      }, 100);
+
+      // Function to show access denied message
+      function showAccessDeniedMessage(userYear, gameYear) {
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("instructionsArea").innerHTML = `
+          <div style="text-align: center; padding: 3rem 2rem; background: var(--white); border-radius: 1rem; box-shadow: var(--shadow-lg); max-width: 600px; margin: 2rem auto;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🚫</div>
+            <h2 style="color: var(--accent-red); margin-bottom: 1rem;">Access Restricted</h2>
+            <p style="color: var(--gray-700); line-height: 1.6; margin-bottom: 1.5rem;">
+              This is a Year ${gameYear} game, but you're registered as a Year ${userYear} student.
+            </p>
+            <p style="color: var(--gray-600); margin-bottom: 2rem;">
+              You can only access games designed for your year level.
+            </p>
+            <a href="games.html" style="
+              display: inline-block;
+              background: var(--orange);
+              color: var(--white);
+              text-decoration: none;
+              padding: 1rem 2rem;
+              border-radius: 0.5rem;
+              font-weight: 600;
+              transition: all 0.3s ease;
+            ">← Back to Your Games</a>
+          </div>
+        `;
+      }
+    });
+
+    function startGame() {
+      score = 0; lives = 3; currentQ = 0; responses = [];
+      
+      // Show instructions with greeting
+      document.getElementById("greeting").innerText = `Hi, ${studentName}!`;
+      document.getElementById("instructionsArea").style.display = "block";
+      
+      // Hide game elements initially
+      document.getElementById("countdown").style.display = "none";
+      document.getElementById("gameArea").style.display = "none";
+      document.getElementById("question").style.display = "none";
+      document.querySelector(".game-stats").style.display = "none";
+    }
+
+    function startCountdown() {
+      // Hide instructions
+      document.getElementById("instructionsArea").style.display = "none";
+      
+      // Show countdown
+      let countdown = 3;
+      const countdownDiv = document.getElementById("countdown");
+      countdownDiv.style.display = "block";
+      countdownDiv.style.textAlign = "center";
+      countdownDiv.style.fontSize = "3rem";
+      countdownDiv.style.color = "var(--orange)";
+      countdownDiv.style.fontWeight = "bold";
+      countdownDiv.style.margin = "2rem 0";
+      countdownDiv.innerText = countdown;
+
+      const interval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          countdownDiv.innerText = countdown;
+        } else {
+          countdownDiv.innerText = "GO!";
+          setTimeout(() => {
+            clearInterval(interval);
+            countdownDiv.style.display = "none";
+
+            // Show UI and first question
+            document.getElementById("gameArea").style.display = "block";
+            document.getElementById("question").style.display = "block";
+            document.querySelector(".game-stats").style.display = "flex";
+            showQuestion();
+          }, 500);
+        }
+      }, 1000);
+    }
+
+    function showQuestion() {
+      if (lives <= 0 || currentQ >= totalQuestions) return endGame();
+
+      answered = false;
+      let q = questions[currentQ];
+      document.getElementById("question").innerText = q.q;
+      const area = document.getElementById("gameArea");
+      area.innerHTML = "";
+
+      // Create array to track bubble positions to prevent overlap
+      let usedPositions = [];
+      
+      q.options.forEach((opt, index) => {
+        let bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.innerText = opt;
+        
+        // Better spacing - divide width into sections for each bubble
+        let sectionWidth = 80 / q.options.length;
+        let minLeft = index * sectionWidth + 5; // Add 5% padding
+        let maxLeft = minLeft + sectionWidth - 15; // Leave space for bubble width
+        bubble.style.left = Math.max(5, Math.min(75, minLeft + Math.random() * (maxLeft - minLeft))) + "%";
+        
+        let duration = 12+Math.random()*4; // Slower bubbles (was 7+Math.random()*3)
+        bubble.style.animationDuration = duration+"s";
+
+        bubble.onclick = () => {
+          if (answered) return;
+          answered = true;
+          if (opt == q.answer) {
+            score++;
+            document.getElementById("score").innerText = "Score: " + score;
+            responses.push({question:q.q, correct:q.answer, answer:opt, result:"Correct"});
+          } else {
+            lives--;
+            document.getElementById("lives").innerText = "Lives: " + "❤️".repeat(lives);
+            responses.push({question:q.q, correct:q.answer, answer:opt, result:"Incorrect"});
+          }
+          nextQuestion();
+        };
+
+        bubble.addEventListener("animationend", () => {
+          if (!answered) {
+            lives--;
+            document.getElementById("lives").innerText = "Lives: " + "❤️".repeat(lives);
+            responses.push({question:q.q, correct:q.answer, answer:"(No Answer)", result:"Missed"});
+            nextQuestion();
+          }
+        });
+
+        area.appendChild(bubble);
+      });
+    }
+
+    function nextQuestion() {
+      currentQ++;
+      setTimeout(showQuestion, 800);
+    }
+
+    function endGame() {
+      document.getElementById("gameArea").innerHTML = "";
+      document.getElementById("result").innerText = 
+        `Game Over. You scored ${score} out of ${totalQuestions}.`;
+
+      // Show loading popup immediately
+      document.getElementById("loadingModal").style.display = "block";
+
+      const payload = {
+        code: code,
+        score: score,
+        game: gameName,
+        sheet: sheetName,
+        responses: responses
+      };
+
+      fetch(scriptURL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(() => {
+        // Hide loading popup
+        document.getElementById("loadingModal").style.display = "none";
+        
+        // Show success message briefly
+        document.getElementById("uploadStatus").style.color = "green";
+        document.getElementById("uploadStatus").innerText = "Results submitted successfully.";
+        
+        // Check for reward after a short delay
+        setTimeout(() => {
+          if (score / totalQuestions >= 0.8) { 
+            giveReward(); 
+          } else {
+            // If no reward, show return home button
+            showReturnHomeButton();
+          }
+        }, 500);
+      })
+      .catch(() => {
+        // Hide loading popup even on error
+        document.getElementById("loadingModal").style.display = "none";
+        
+        document.getElementById("uploadStatus").style.color = "red";
+        document.getElementById("uploadStatus").innerText = "Could not submit results.";
+        
+        // Show return home button even on error
+        showReturnHomeButton();
+      });
+    }
+
+    function showReturnHomeButton() {
+      const returnBtn = document.createElement('button');
+      returnBtn.innerHTML = '🏠 Return to Games';
+      returnBtn.style.cssText = `
+        margin: 2rem auto;
+        padding: 1rem 2rem;
+        display: block;
+        background: var(--orange);
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      `;
+      returnBtn.onmouseover = () => returnBtn.style.transform = 'translateY(-2px)';
+      returnBtn.onmouseout = () => returnBtn.style.transform = 'translateY(0)';
+      returnBtn.onclick = () => window.location.href = 'games.html';
+      
+      document.getElementById("result").appendChild(returnBtn);
+    }
+
+    let currentReward = ""; // Store the current reward
+
+    function giveReward() {
+      fetch(scriptURL + "?rewards=" + encodeURIComponent(code))
+        .then(res => res.json())
+        .then(data => {
+          let currentRewards = Array.isArray(data.rewards) ? data.rewards : (data.rewards ? data.rewards.split("") : []);
+          let available = animals.filter(a => !currentRewards.includes(a));
+          if (available.length === 0) {
+            document.getElementById("uploadStatus").innerText = "You’ve collected all the animals! 🎉";
+            return;
+          }
+          currentReward = available[Math.floor(Math.random() * available.length)];
+          
+          // Show the modal popup
+          document.getElementById("rewardModal").style.display = "block";
+          document.getElementById("rewardDisplay").innerText = "🎁";
+          document.getElementById("rewardMessage").innerText = "Click the present to reveal your reward!";
+          document.getElementById("closeRewardBtn").style.display = "none";
+          
+          // Save reward to sheet
+          fetch(scriptURL, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify({ code: code, reward: currentReward }),
+            headers: { "Content-Type": "application/json" }
+          });
+        })
+        .catch(err => {
+          console.error("Reward error:", err);
+          document.getElementById("uploadStatus").innerText = "⚠️ Could not fetch rewards.";
+        });
+    }
+    
+    function revealReward() {
+      document.getElementById("rewardDisplay").innerText = currentReward;
+      document.getElementById("rewardDisplay").style.animation = "wiggle 1s infinite";
+      document.getElementById("rewardMessage").innerText = "🎉 You earned a new animal friend! 🎉";
+      document.getElementById("rewardButtons").style.display = "block"; // Show both buttons
+      
+      // Remove click ability after reveal
+      document.getElementById("rewardDisplay").onclick = null;
+      document.getElementById("rewardDisplay").style.cursor = "default";
+      
+      // Confetti animation
+      for (let i = 0; i < 50; i++) {
+        let confetti = document.createElement("div");
+        confetti.className = "confetti";
+        confetti.style.left = Math.random() * 100 + "vw";
+        confetti.style.backgroundColor = ["#E15C31","#A6BFFF","#22277A","#FFD700","#32CD32"][Math.floor(Math.random()*5)];
+        confetti.style.animationDuration = (2 + Math.random() * 3) + "s";
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 3000);
+      }
+    }
+    
+    function closeRewardModal() {
+      document.getElementById("rewardModal").style.display = "none";
+      // Reset for next time
+      document.getElementById("rewardDisplay").onclick = revealReward;
+      document.getElementById("rewardDisplay").style.cursor = "pointer";
+      document.getElementById("rewardDisplay").style.animation = "";
+    }
+    
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+      let modal = document.getElementById("rewardModal");
+      if (event.target === modal) {
+        closeRewardModal();
+      }
+    }
+  </script>
+
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2025 Jando EDU. All rights reserved. | <a href="https://www.jandotutoring.com/privacy-policy" target="_blank">Privacy Policy</a> | <a href="https://www.jandotutoring.com/contact-us" target="_blank">Contact</a></p>
+    </div>
+  </footer>
+</body>
+</html>

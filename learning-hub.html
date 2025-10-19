@@ -1,0 +1,2139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learning Hub - Jando EDU</title>
+  <link rel="stylesheet" href="shared-styles.css">
+  <style>
+    /* Learning Hub specific styles */
+    .hub-hero {
+      background: linear-gradient(135deg, var(--light-blue) 0%, var(--dark-blue) 100%);
+      color: var(--white);
+      padding: 3rem 0;
+      text-align: center;
+      margin: 0 0 2rem 0;
+      width: 100%;
+    }
+
+    .hub-hero h1 {
+      font-size: 2.5rem;
+      margin: 0 0 1rem 0;
+      font-weight: var(--font-weight-bold);
+    }
+
+    .hub-hero p {
+      font-size: 1.2rem;
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    /* Subject Filter Buttons */
+    .subject-filters {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+    }
+
+    .subject-btn {
+      background: var(--white);
+      color: var(--dark-blue);
+      border: 2px solid var(--gray-300);
+      padding: 1rem 2rem;
+      border-radius: 0.75rem;
+      font-weight: var(--font-weight-bold);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .subject-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .subject-btn.active {
+      background: var(--orange);
+      color: var(--white);
+      border-color: var(--orange);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .subject-icon {
+      font-size: 1.5rem;
+    }
+
+    /* Module Grid */
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .module-card {
+      background: var(--white);
+      border-radius: 1rem;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      transition: all 0.3s ease;
+      border: 3px solid transparent;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .module-card.collapsed {
+      height: 200px;
+    }
+
+    .module-card.expanded {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 95vw;
+      max-width: 1200px;
+      height: 90vh;
+      z-index: 1000;
+      overflow-y: auto;
+      cursor: default;
+    }
+
+    .module-card:hover:not(.expanded) {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-xl);
+      border-color: var(--light-blue);
+    }
+
+    .module-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .module-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .close-module {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(255, 255, 255, 0.95);
+      border: 2px solid var(--gray-300);
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
+      border-radius: 50%;
+      font-size: 24px;
+      font-weight: bold;
+      font-family: Arial, sans-serif;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 1001;
+      line-height: 1;
+      padding: 0;
+      margin: 0;
+      color: var(--gray-700);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .module-card.expanded .close-module {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-module::before {
+      content: "×";
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      line-height: 1;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .close-module:hover {
+      background: #ff4757;
+      color: white;
+      border-color: #ff4757;
+      transform: scale(1.1) rotate(90deg);
+      box-shadow: 0 6px 20px rgba(255, 71, 87, 0.3);
+    }
+
+    .module-header {
+      background: linear-gradient(135deg, var(--light-blue) 0%, var(--orange) 100%);
+      color: var(--white);
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .module-header h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.4rem;
+      font-weight: var(--font-weight-bold);
+    }
+
+    .module-header p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 0.95rem;
+    }
+
+    .module-content {
+      padding: 1.5rem;
+      overflow: hidden;
+    }
+
+    .module-content.collapsed {
+      max-height: 120px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .module-content.collapsed::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: linear-gradient(transparent, white);
+      pointer-events: none;
+    }
+
+    .module-content.expanded {
+      max-height: none;
+      overflow: visible;
+    }
+
+    .module-preview {
+      display: block;
+    }
+
+    .module-preview.hidden {
+      display: none;
+    }
+
+    .module-full-content {
+      display: none;
+    }
+
+    .module-full-content.visible {
+      display: block;
+    }
+
+    .progress-indicator {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.875rem;
+      font-weight: bold;
+      color: var(--dark-blue);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .progress-indicator.completed {
+      background: var(--accent-green);
+      color: white;
+    }
+
+    .progress-indicator.in-progress {
+      background: var(--orange);
+      color: white;
+    }
+
+    .step-tracker {
+      background: var(--gray-50);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin: 1rem 0;
+      border-left: 4px solid var(--light-blue);
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .step-item:last-child {
+      border-bottom: none;
+    }
+
+    .step-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--gray-300);
+      border-radius: 4px;
+      margin-right: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .step-checkbox.completed {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+      color: white;
+    }
+
+    .step-checkbox.completed::after {
+      content: '✓';
+      font-size: 0.875rem;
+      font-weight: bold;
+    }
+
+    .step-text {
+      flex: 1;
+      color: var(--gray-700);
+    }
+
+    .step-text.completed {
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+
+    .module-section {
+      margin-bottom: 2rem;
+    }
+
+    .module-section h4 {
+      color: var(--dark-blue);
+      margin: 0 0 1rem 0;
+      font-size: 1.3rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-icon {
+      font-size: 1.4rem;
+    }
+
+    /* Teaching Content */
+    .teaching-content {
+      background: var(--gray-50);
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      border-left: 4px solid var(--light-blue);
+      margin-bottom: 1rem;
+    }
+
+    .key-concepts {
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0;
+    }
+
+    .key-concepts li {
+      padding: 0.5rem 0;
+      color: var(--gray-700);
+      position: relative;
+      padding-left: 1.5rem;
+    }
+
+    .key-concepts li::before {
+      content: '💡';
+      position: absolute;
+      left: 0;
+    }
+
+    .concept-overview h5 {
+      color: var(--dark-blue);
+      margin: 0 0 0.5rem 0;
+    }
+
+    .concept-examples {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--gray-200);
+    }
+
+    .concept-examples h6 {
+      color: var(--dark-blue);
+      margin: 0 0 0.5rem 0;
+    }
+
+    .example-list {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0;
+    }
+
+    .example-list li {
+      background: var(--gray-100);
+      padding: 0.5rem;
+      margin: 0.25rem 0;
+      border-radius: 0.25rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+
+    .mark-concepts-complete-btn {
+      background: var(--accent-green);
+      color: white;
+      border: none;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: all 0.2s ease;
+      display: block;
+      width: 100%;
+    }
+
+    .mark-concepts-complete-btn:hover {
+      background: #059669;
+      transform: translateY(-1px);
+    }
+
+    /* Video Section */
+    .video-section {
+      background: var(--gray-50);
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      border-left: 4px solid var(--orange);
+      margin-bottom: 1rem;
+    }
+
+    .video-placeholder {
+      background: var(--gray-200);
+      height: 200px;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-600);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .video-placeholder:hover {
+      background: var(--gray-300);
+    }
+
+    .video-placeholder.loaded {
+      background: transparent;
+      height: auto;
+      padding: 0;
+    }
+
+    /* Activities Section */
+    .activities-section {
+      background: var(--gray-50);
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      border-left: 4px solid var(--accent-green);
+    }
+
+    .activity-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .activity-btn {
+      background: var(--white);
+      border: 2px solid var(--gray-300);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: var(--dark-blue);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .activity-btn:hover {
+      border-color: var(--orange);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .activity-btn.game {
+      border-color: var(--accent-green);
+    }
+
+    .activity-btn.quiz {
+      border-color: var(--orange);
+    }
+
+    .activity-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    /* Game and Quiz Containers */
+    .game-container, .quiz-container {
+      margin-top: 1rem;
+      border: 2px solid var(--light-blue);
+      border-radius: 0.75rem;
+      background: white;
+      overflow: hidden;
+    }
+
+    .game-header, .quiz-header {
+      background: var(--light-blue);
+      color: white;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .game-header h5, .quiz-header h5 {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .close-game-btn, .close-quiz-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-game-btn:hover, .close-quiz-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .game-iframe {
+      width: 100%;
+      height: 700px;
+      border: none;
+      display: block;
+      min-height: 600px;
+    }
+
+    .game-footer {
+      padding: 1rem;
+      background: var(--gray-50);
+      text-align: center;
+    }
+
+    .complete-game-btn {
+      background: var(--accent-green);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .complete-game-btn:hover {
+      background: #059669;
+      transform: translateY(-1px);
+    }
+
+    .quiz-content {
+      padding: 1.5rem;
+      min-height: 300px;
+    }
+
+    .quiz-header-content {
+      margin-bottom: 1.5rem;
+    }
+
+    .quiz-header-content h4 {
+      color: var(--dark-blue);
+      margin: 0 0 0.5rem 0;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .quiz-question {
+      background: var(--gray-50);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .quiz-question h5 {
+      color: var(--dark-blue);
+      margin: 0 0 1rem 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .quiz-option {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      background: white;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.25rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+    }
+
+    .quiz-option:hover {
+      border-color: var(--light-blue);
+      background: var(--gray-50);
+    }
+
+    .quiz-option input[type="radio"] {
+      margin-right: 0.75rem;
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .quiz-feedback {
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .quiz-feedback.correct {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #10b981;
+    }
+
+    .quiz-feedback.incorrect {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #ef4444;
+    }
+
+    .quiz-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--gray-200);
+    }
+
+    .complete-quiz-btn {
+      background: var(--accent-green);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      opacity: 0.6;
+    }
+
+    .complete-quiz-btn:hover:not(:disabled) {
+      background: #059669;
+      transform: translateY(-1px);
+    }
+
+    .complete-quiz-btn:disabled {
+      background: var(--gray-400);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .complete-quiz-btn:not(:disabled) {
+      opacity: 1;
+      cursor: pointer;
+    }
+
+    /* Progress Indicators */
+    .module-progress {
+      background: var(--white);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--gray-300);
+      margin-top: 1rem;
+    }
+
+    .progress-bar {
+      background: var(--gray-200);
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 0.5rem 0;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, var(--accent-green) 0%, var(--light-blue) 100%);
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+      text-align: center;
+    }
+
+    /* No modules message */
+    .no-modules-message {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: var(--white);
+      border-radius: 1rem;
+      box-shadow: var(--shadow-lg);
+      margin: 2rem auto;
+      max-width: 600px;
+    }
+
+    .no-modules-message h3 {
+      color: var(--dark-blue);
+      margin-bottom: 1rem;
+    }
+
+    .no-modules-message p {
+      color: var(--gray-600);
+      line-height: 1.6;
+    }
+
+    /* Ensure no modules message is hidden by default */
+    #noModulesMessage {
+      display: none !important;
+    }
+
+    #noModulesMessage.show {
+      display: block !important;
+    }
+
+    /* Success Modal */
+    .success-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .success-modal {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .success-modal-overlay[style*="opacity: 1"] .success-modal {
+      transform: scale(1);
+    }
+
+    .success-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .success-modal h3 {
+      color: var(--dark-blue);
+      margin: 0 0 1rem 0;
+      font-size: 1.5rem;
+    }
+
+    .success-modal p {
+      color: var(--gray-600);
+      margin: 0 0 2rem 0;
+      font-size: 1.1rem;
+    }
+
+    .success-btn {
+      background: var(--accent-green);
+      color: white;
+      border: none;
+      padding: 0.75rem 2rem;
+      border-radius: 0.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+    }
+
+    .success-btn:hover {
+      background: #059669;
+      transform: translateY(-1px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .subject-filters {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .subject-btn {
+        width: 100%;
+        max-width: 300px;
+      }
+
+      .modules-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .activity-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Authentication Modal -->
+  <div id="authModal">
+    <div id="authModalContent">
+      <h2>Welcome to Jando EDU!</h2>
+      <p>Please enter your unique student code to access your learning modules and track your progress.</p>
+      <input type="text" id="studentCodeInput" placeholder="Enter your student code" maxlength="20">
+      <div id="authError" style="display: none; color: var(--accent-red); margin: 0.5rem 0; font-size: 0.875rem;"></div>
+      <button id="authLoginBtn" onclick="jandoAuth.authenticateUser()">Login</button>
+    </div>
+  </div>
+
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <img src="https://i.imgur.com/QIdMEsB.png" alt="Jando EDU Logo" class="logo">
+      </div>
+      <div class="header-right">
+        <span id="userGreeting" style="display: none;"></span>
+        <div class="menu-container">
+          <button id="menuBtn" class="menu-button">☰ Menu</button>
+          <div id="menuDropdown" class="menu-dropdown">
+            <a href="index.html" class="menu-item">Home</a>
+            <a href="learning-hub.html" class="menu-item">Learning Hub</a>
+            <a href="games.html" class="menu-item">Games</a>
+            <a href="reward.html" class="menu-item">My Rewards</a>
+            <button class="menu-logout" onclick="jandoAuth.logout()">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="hub-hero">
+    <h1 id="hubTitle">Learning Hub</h1>
+    <p id="hubSubtitle">Explore interactive modules, watch educational videos, and master new concepts</p>
+  </div>
+
+  <div class="container" style="padding: 2rem; max-width: 1400px;">
+    <!-- Module Overlay -->
+    <div class="module-overlay" id="moduleOverlay" onclick="closeModule()"></div>
+
+    <!-- Subject Filter Buttons -->
+    <div class="subject-filters">
+      <button class="subject-btn active" data-subject="all" onclick="filterBySubject('all')">
+        <span class="subject-icon">📚</span>
+        All Subjects
+      </button>
+      <button class="subject-btn" data-subject="mathematics" onclick="filterBySubject('mathematics')">
+        <span class="subject-icon">🧮</span>
+        Mathematics
+      </button>
+      <button class="subject-btn" data-subject="english" onclick="filterBySubject('english')">
+        <span class="subject-icon">📖</span>
+        English
+      </button>
+      <button class="subject-btn" data-subject="science" onclick="filterBySubject('science')">
+        <span class="subject-icon">🔬</span>
+        Science
+      </button>
+      <button class="subject-btn" data-subject="geography" onclick="filterBySubject('geography')">
+        <span class="subject-icon">🌍</span>
+        Geography
+      </button>
+      <button class="subject-btn" data-subject="history" onclick="filterBySubject('history')">
+        <span class="subject-icon">🏛️</span>
+        History
+      </button>
+    </div>
+
+    <!-- Modules Grid -->
+    <div class="modules-grid" id="modulesGrid">
+      <!-- Modules will be loaded dynamically from Google Sheets -->
+    </div>
+
+    <!-- Loading Message (shows by default) -->
+    <div id="loadingModules" class="no-modules-message">
+      <h3>📖 Loading Learning Modules...</h3>
+      <p>Please wait while we fetch your learning content.</p>
+    </div>
+
+    <!-- No Modules Message (hidden by default, only shown after loading completes with no results) -->
+    <div id="noModulesMessage" class="no-modules-message" style="display: none !important;">
+      <h3>📚 No Learning Modules Available</h3>
+      <p>Modules for your year level will appear here once they're added by your teacher.</p>
+    </div>
+
+
+  </div>
+
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2025 Jando EDU. All rights reserved. | <a href="https://www.jandotutoring.com/privacy-policy" target="_blank">Privacy Policy</a> | <a href="https://www.jandotutoring.com/contact-us" target="_blank">Contact</a></p>
+    </div>
+  </footer>
+
+  <script src="auth.js"></script>
+  <script>
+    // Configuration
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwNZGb_nRFF9t4lLdJdbII1kuDKhsiy4_liBxOe3pNc6rWP7swfem33C_ALT3OWQ9GoQ/exec'; // Replace with your deployed web app URL ending in /exec
+    
+    let currentFilter = 'all';
+    let userYearLevel = null;
+    let currentUser = null;
+
+    // Initialize page when user is authenticated
+    document.addEventListener('DOMContentLoaded', () => {
+      // Try to load modules immediately (fallback)
+      setTimeout(() => {
+        if (!currentUser) {
+          console.log('Loading modules without authentication (fallback)');
+          loadModulesFromSheets();
+        }
+      }, 2000);
+
+      const checkAuth = setInterval(() => {
+        if (window.jandoAuth && jandoAuth.isAuthenticated()) {
+          const user = jandoAuth.getCurrentUser();
+          if (user) {
+            // Store current user data
+            currentUser = user;
+            
+            // Extract year level
+            userYearLevel = user.yearLevel || user.year || user.Year || user['Year Level'] || user.grade || user.Grade;
+            if (userYearLevel) {
+              userYearLevel = userYearLevel.toString().replace(/[^0-9]/g, '');
+              console.log('User year level for Learning Hub:', userYearLevel);
+              
+              // Update hero section
+              document.getElementById('hubTitle').textContent = `Year ${userYearLevel} Learning Hub`;
+              document.getElementById('hubSubtitle').textContent = `Explore Year ${userYearLevel} modules, watch educational videos, and master new concepts`;
+            }
+            
+            // Filter modules by year level
+            filterModulesByYear();
+            
+            // Load modules from Google Sheets
+            loadModulesFromSheets();
+          }
+          clearInterval(checkAuth);
+        }
+      }, 100);
+
+      // Also listen for auth completion event
+      window.addEventListener('jandoAuthComplete', (event) => {
+        setTimeout(() => {
+          const user = event.detail;
+          if (user) {
+            // Store current user data
+            currentUser = user;
+            
+            userYearLevel = user.yearLevel || user.year || user.Year || user['Year Level'] || user.grade || user.Grade;
+            if (userYearLevel) {
+              userYearLevel = userYearLevel.toString().replace(/[^0-9]/g, '');
+              document.getElementById('hubTitle').textContent = `Year ${userYearLevel} Learning Hub`;
+              document.getElementById('hubSubtitle').textContent = `Explore Year ${userYearLevel} modules, watch educational videos, and master new concepts`;
+            }
+            filterModulesByYear();
+            
+            // Load modules from Google Sheets
+            loadModulesFromSheets();
+          }
+        }, 100);
+      });
+    });
+
+    // Load modules from Google Sheets
+    async function loadModulesFromSheets() {
+      console.log('Loading modules from sheets...', {SCRIPT_URL, userYearLevel});
+      
+      // Ensure proper initial state
+      document.getElementById('loadingModules').style.display = 'block';
+      document.getElementById('noModulesMessage').classList.remove('show');
+      
+      if (!SCRIPT_URL) {
+        console.error('SCRIPT_URL not configured');
+        document.getElementById('loadingModules').style.display = 'none';
+        document.getElementById('noModulesMessage').innerHTML = 
+          '<h3>⚠️ Configuration Error</h3><p>SCRIPT_URL not configured. Please check the setup.</p>';
+        document.getElementById('noModulesMessage').classList.add('show');
+        return;
+      }
+
+      try {
+        const url = `${SCRIPT_URL}?modules=true&year=${userYearLevel || '6'}`;
+        console.log('Fetching modules from:', url);
+        
+        const response = await fetch(url);
+        console.log('Response status:', response.status);
+        
+        const modules = await response.json();
+        console.log('Modules loaded:', modules);
+        
+        // Always hide loading message first
+        document.getElementById('loadingModules').style.display = 'none';
+        
+        if (modules && modules.length > 0) {
+          // Modules found - hide no modules message and show modules
+          document.getElementById('noModulesMessage').style.display = 'none';
+          renderModules(modules);
+          filterModules();
+          console.log('Successfully loaded and rendered', modules.length, 'modules');
+        } else {
+          // No modules found - show the no modules message
+          console.log('No modules found for year:', userYearLevel || '6');
+          document.getElementById('noModulesMessage').innerHTML = 
+            '<h3>📚 No Modules Found</h3><p>No learning modules found for year ' + (userYearLevel || '6') + '. Please check your Google Sheets.</p>';
+          document.getElementById('noModulesMessage').classList.add('show');
+        }
+      } catch (error) {
+        console.error('Error loading modules:', error);
+        document.getElementById('loadingModules').style.display = 'none';
+        document.getElementById('noModulesMessage').innerHTML = 
+          '<h3>⚠️ Unable to Load Modules</h3><p>Error: ' + error.message + '</p><p>Please check your internet connection and Google Apps Script setup.</p>';
+        document.getElementById('noModulesMessage').classList.add('show');
+      }
+    }
+
+    // Render modules from Google Sheets data
+    function renderModules(modules) {
+      console.log('Rendering modules:', modules);
+      
+      // Ensure proper message state
+      document.getElementById('loadingModules').style.display = 'none';
+      document.getElementById('noModulesMessage').classList.remove('show');
+      
+      const grid = document.getElementById('modulesGrid');
+      grid.innerHTML = '';
+
+      modules.forEach((module, index) => {
+        console.log(`Rendering module ${index + 1}:`, module);
+        const moduleCard = createModuleCard(module);
+        grid.appendChild(moduleCard);
+      });
+      
+      console.log('All modules rendered successfully');
+    }
+
+    // Create a module card element
+    function createModuleCard(module) {
+      const card = document.createElement('div');
+      card.className = 'module-card collapsed';
+      card.setAttribute('data-subject', module.subject);
+      card.setAttribute('data-year', module.yearLevel);
+      card.setAttribute('data-module-id', module.moduleId);
+      card.onclick = (event) => {
+        event.stopPropagation();
+        expandModule(card);
+      };
+
+      const videoSection = module.videoId ? generateVideoSection(module) : '<!-- No video ID provided -->';
+      const activitiesSection = generateActivitiesSection(module);
+
+      card.innerHTML = `
+        <button class="close-module" onclick="event.stopPropagation(); closeModule()"></button>
+        <div class="progress-indicator" id="progress-${module.moduleId}">0%</div>
+        
+        <div class="module-header">
+          <h3>${module.moduleName}</h3>
+          <p>${module.description}</p>
+        </div>
+        
+        <div class="module-content collapsed">
+          <!-- Preview Content -->
+          <div class="module-preview">
+            <p style="color: var(--gray-600); margin: 0; line-height: 1.4;">${module.description}</p>
+          </div>
+
+          <!-- Full Content -->
+          <div class="module-full-content">
+            <!-- Step Tracker -->
+            <div class="step-tracker">
+              <h4 style="margin: 0 0 1rem 0; color: var(--dark-blue);">📋 Learning Steps</h4>
+              ${generateSteps(module)}
+            </div>
+
+            <!-- Teaching Content -->
+            <div class="module-section">
+              <h4><span class="section-icon">📚</span>Key Concepts</h4>
+              <div class="teaching-content">
+                ${generateKeyConcepts(module)}
+                <button class="mark-concepts-complete-btn" onclick="event.stopPropagation(); markStepComplete('${module.moduleId}', 1)">
+                  ✓ I've studied the key concepts
+                </button>
+              </div>
+            </div>
+
+            ${videoSection}
+            ${activitiesSection}
+          </div>
+        </div>
+      `;
+
+      return card;
+    }
+
+    // Generate key concepts content
+    function generateKeyConcepts(module) {
+      const concepts = {
+        'Y6M-W1-PlaceValue': {
+          title: 'Understanding Place Value',
+          concepts: [
+            'Each digit in a number has a specific place value (units, tens, hundreds, thousands, etc.)',
+            'The value of a digit depends on its position in the number',
+            'Moving left increases place value by 10 times (10, 100, 1,000, 10,000)',
+            'We can read numbers by understanding what each digit represents',
+            'Rounding numbers helps us work with approximate values'
+          ],
+          examples: [
+            'In 47,832: 4 is in ten thousands (40,000), 7 is in thousands (7,000), 8 is in hundreds (800), 3 is in tens (30), 2 is in units (2)',
+            '2,456 rounded to nearest hundred is 2,500',
+            '78,329 = 70,000 + 8,000 + 300 + 20 + 9'
+          ]
+        }
+      };
+      
+      const moduleContent = concepts[module.moduleId];
+      if (!moduleContent) {
+        return '<p>Key learning concepts will be added for this module soon.</p>';
+      }
+      
+      let html = `
+        <div class="concept-overview">
+          <h5>${moduleContent.title}</h5>
+          <p>Master these important concepts:</p>
+        </div>
+        <ul class="key-concepts">
+      `;
+      
+      moduleContent.concepts.forEach(concept => {
+        html += `<li>${concept}</li>`;
+      });
+      
+      html += `
+        </ul>
+        <div class="concept-examples">
+          <h6>📝 Examples:</h6>
+          <ul class="example-list">
+      `;
+      
+      moduleContent.examples.forEach(example => {
+        html += `<li>${example}</li>`;
+      });
+      
+      html += '</ul></div>';
+      return html;
+    }
+
+    // Generate steps for a module
+    function generateSteps(module) {
+      const totalSteps = module.totalSteps || 4;
+      let stepsHtml = '';
+      
+      const stepNames = [
+        'Study key concepts',
+        'Watch educational video',
+        'Complete practice activity',
+        'Take the quiz'
+      ];
+
+      for (let i = 1; i <= totalSteps; i++) {
+        stepsHtml += `
+          <div class="step-item" data-step="${i}">
+            <div class="step-checkbox" onclick="event.stopPropagation(); toggleStep('${module.moduleId}', ${i})"></div>
+            <div class="step-text">${stepNames[i-1] || `Step ${i}`}</div>
+          </div>
+        `;
+      }
+      
+      return stepsHtml;
+    }
+
+    // Generate video section if video exists
+    function generateVideoSection(module) {
+      console.log('Generating video section for module:', module.moduleId, 'VideoID:', module.videoId);
+      
+      if (!module.videoId || module.videoId === '#' || module.videoId === '') {
+        console.log('No valid video ID found for module:', module.moduleId);
+        return '';
+      }
+      
+      return `
+        <div class="module-section">
+          <h4><span class="section-icon">🎥</span>Educational Video</h4>
+          <div class="video-section">
+            <div class="video-placeholder" onclick="event.stopPropagation(); loadVideo(this, '${module.videoId}'); markStepComplete('${module.moduleId}', 2)" data-video="${module.videoId}">
+              🎬 Click to watch: "${module.moduleName}" video
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Generate activities section
+    function generateActivitiesSection(module) {
+      return `
+        <div class="module-section">
+          <h4><span class="section-icon">🎯</span>Practice Activities</h4>
+          <div class="activities-section">
+            <div class="activity-grid">
+              ${module.gameLink && module.gameLink !== '#' && module.gameLink !== '' ? 
+                `<button class="activity-btn game" onclick="event.stopPropagation(); openGameInPopup('${module.gameLink}', '${module.moduleName}', '${module.moduleId}')">
+                  <span class="activity-icon">🎮</span>
+                  Practice Game
+                </button>` : 
+                `<button class="activity-btn game" onclick="event.stopPropagation(); showComingSoon()">
+                  <span class="activity-icon">🎮</span>
+                  Practice Game (Coming Soon)
+                </button>`
+              }
+              <button class="activity-btn quiz" onclick="event.stopPropagation(); startQuiz('${module.moduleId}', '${module.moduleName}')">
+                <span class="activity-icon">❓</span>
+                Quick Quiz
+              </button>
+            </div>
+            
+            <!-- Game iframe container (hidden by default) -->
+            <div class="game-container" id="game-${module.moduleId}" style="display: none;">
+              <div class="game-header">
+                <h5>🎮 ${module.moduleName} - Practice Game</h5>
+                <button class="close-game-btn" onclick="event.stopPropagation(); closeGame('${module.moduleId}')">×</button>
+              </div>
+              <iframe class="game-iframe" src="" frameborder="0" allowfullscreen></iframe>
+              <div class="game-footer">
+                <button class="complete-game-btn" onclick="event.stopPropagation(); markStepComplete('${module.moduleId}', 3); closeGame('${module.moduleId}')">
+                  ✓ Mark Game Complete
+                </button>
+              </div>
+            </div>
+
+            <!-- Quiz container (hidden by default) -->
+            <div class="quiz-container" id="quiz-${module.moduleId}" style="display: none;">
+              <div class="quiz-header">
+                <h5>❓ ${module.moduleName} - Quick Quiz</h5>
+                <button class="close-quiz-btn" onclick="event.stopPropagation(); closeQuiz('${module.moduleId}')">×</button>
+              </div>
+              <div class="quiz-content">
+                <!-- Quiz content will be loaded here -->
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Filter modules by subject
+    function filterBySubject(subject) {
+      currentFilter = subject;
+      
+      // Update active button
+      document.querySelectorAll('.subject-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector(`[data-subject="${subject}"]`).classList.add('active');
+      
+      // Filter modules
+      filterModules();
+    }
+
+    // Filter modules by year level
+    function filterModulesByYear() {
+      const modules = document.querySelectorAll('.module-card');
+      modules.forEach(module => {
+        const moduleYear = module.getAttribute('data-year');
+        if (!userYearLevel || moduleYear === userYearLevel) {
+          module.style.display = 'block';
+        } else {
+          module.style.display = 'none';
+        }
+      });
+      
+      // Apply subject filter on top of year filter
+      filterModules();
+    }
+
+    // Combined filtering
+    function filterModules() {
+      const modules = document.querySelectorAll('.module-card');
+      let visibleCount = 0;
+      
+      modules.forEach(module => {
+        const moduleSubject = module.getAttribute('data-subject');
+        const moduleYear = module.getAttribute('data-year');
+        
+        let show = true;
+        
+        // Year filter (if user has year level)
+        if (userYearLevel && moduleYear !== userYearLevel) {
+          show = false;
+        }
+        
+        // Subject filter
+        if (currentFilter !== 'all' && moduleSubject !== currentFilter) {
+          show = false;
+        }
+        
+        module.style.display = show ? 'block' : 'none';
+        if (show) visibleCount++;
+      });
+      
+      // Show/hide no modules message
+      const noModulesMessage = document.getElementById('noModulesMessage');
+      if (visibleCount === 0) {
+        noModulesMessage.style.display = 'block';
+      } else {
+        noModulesMessage.style.display = 'none';
+      }
+    }
+
+    // Load YouTube video
+    function loadVideo(element, videoId) {
+      if (element.classList.contains('loaded')) return;
+      
+      console.log('Loading video:', videoId);
+      
+      if (!videoId || videoId === '' || videoId === '#') {
+        console.error('Invalid video ID:', videoId);
+        return;
+      }
+      
+      const iframe = document.createElement('iframe');
+      iframe.width = '100%';
+      iframe.height = '200';
+      iframe.src = `https://www.youtube.com/embed/${videoId}`;
+      iframe.frameBorder = '0';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      iframe.style.borderRadius = '0.5rem';
+      
+      element.innerHTML = '';
+      element.appendChild(iframe);
+      element.classList.add('loaded');
+      
+      console.log('Video loaded successfully:', videoId);
+    }
+
+    // Start quiz (placeholder)
+    function startQuiz(quizType) {
+      alert(`Starting ${quizType} quiz! This feature will be connected to your quiz system.`);
+    }
+
+    // Show coming soon message
+    function showComingSoon() {
+      alert('This activity is coming soon! Stay tuned for updates.');
+    }
+
+    // Module expansion functionality
+    let currentExpandedModule = null;
+
+    function expandModule(moduleElement) {
+      // If this module is already expanded, don't expand again
+      if (currentExpandedModule === moduleElement) {
+        return;
+      }
+
+      // Close any currently expanded module
+      if (currentExpandedModule) {
+        closeModule();
+      }
+
+      // Mark this as the currently expanded module
+      currentExpandedModule = moduleElement;
+
+      // Add expanded class and show overlay
+      moduleElement.classList.remove('collapsed');
+      moduleElement.classList.add('expanded');
+      
+      // Show the full content
+      const moduleContent = moduleElement.querySelector('.module-content');
+      moduleContent.classList.remove('collapsed');
+      
+      // Show the full module content
+      const moduleFullContent = moduleElement.querySelector('.module-full-content');
+      if (moduleFullContent) {
+        moduleFullContent.classList.add('visible');
+      }
+      
+      // Hide the preview content
+      const modulePreview = moduleElement.querySelector('.module-preview');
+      if (modulePreview) {
+        modulePreview.classList.add('hidden');
+      }
+      
+      // Remove any existing overlays first
+      const existingOverlays = document.querySelectorAll('.module-overlay');
+      existingOverlays.forEach(overlay => overlay.remove());
+      
+      // Create and show overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'module-overlay';
+      overlay.onclick = closeModule;
+      document.body.appendChild(overlay);
+      
+      // Make overlay visible
+      setTimeout(() => {
+        overlay.style.opacity = '1';
+        overlay.style.visibility = 'visible';
+      }, 10);
+      
+      // Disable body scrolling
+      document.body.style.overflow = 'hidden';
+      
+      // Show close button
+      const closeBtn = moduleElement.querySelector('.close-module');
+      closeBtn.style.display = 'block';
+
+      // Load progress for this module
+      loadModuleProgress(moduleElement.getAttribute('data-module-id'));
+    }
+
+    function closeModule() {
+      if (!currentExpandedModule) return;
+
+      // Remove expanded classes
+      currentExpandedModule.classList.remove('expanded');
+      currentExpandedModule.classList.add('collapsed');
+      
+      // Hide full content
+      const moduleContent = currentExpandedModule.querySelector('.module-content');
+      moduleContent.classList.add('collapsed');
+      
+      // Hide the full module content
+      const moduleFullContent = currentExpandedModule.querySelector('.module-full-content');
+      if (moduleFullContent) {
+        moduleFullContent.classList.remove('visible');
+      }
+      
+      // Show the preview content
+      const modulePreview = currentExpandedModule.querySelector('.module-preview');
+      if (modulePreview) {
+        modulePreview.classList.remove('hidden');
+      }
+      
+      // Hide close button
+      const closeBtn = currentExpandedModule.querySelector('.close-module');
+      closeBtn.style.display = 'none';
+      
+      // Remove ALL overlays (in case multiple exist)
+      const overlays = document.querySelectorAll('.module-overlay');
+      overlays.forEach(overlay => {
+        overlay.style.opacity = '0';
+        overlay.style.visibility = 'hidden';
+        setTimeout(() => {
+          if (overlay.parentNode) {
+            overlay.remove();
+          }
+        }, 300);
+      });
+      
+      // Re-enable body scrolling
+      document.body.style.overflow = 'auto';
+      
+      // Clear current expanded module
+      currentExpandedModule = null;
+    }
+
+    // Step completion functionality
+    function toggleStep(moduleId, stepNumber) {
+      const stepItem = document.querySelector(`[data-module-id="${moduleId}"] .step-item[data-step="${stepNumber}"]`);
+      const checkbox = stepItem.querySelector('.step-checkbox');
+      
+      // Toggle completed state
+      stepItem.classList.toggle('completed');
+      
+      // Update progress
+      updateModuleProgress(moduleId);
+      
+      // Save to Google Sheets if completed
+      if (stepItem.classList.contains('completed')) {
+        markStepComplete(moduleId, stepNumber);
+      }
+    }
+
+    function markStepComplete(moduleId, stepNumber) {
+      const stepItem = document.querySelector(`[data-module-id="${moduleId}"] .step-item[data-step="${stepNumber}"]`);
+      if (!stepItem.classList.contains('completed')) {
+        stepItem.classList.add('completed');
+        updateModuleProgress(moduleId);
+        
+        // Save to Google Sheets
+        saveProgressToSheets(moduleId, stepNumber);
+      }
+    }
+
+    function toggleStep(moduleId, stepNumber) {
+      const stepItem = document.querySelector(`[data-module-id="${moduleId}"] .step-item[data-step="${stepNumber}"]`);
+      
+      if (stepItem.classList.contains('completed')) {
+        // Unmark as completed
+        stepItem.classList.remove('completed');
+        console.log(`Step ${stepNumber} unmarked as completed`);
+        
+        // Remove from localStorage
+        const studentCode = getStudentCode();
+        const progressKey = `progress_${studentCode}_${moduleId}`;
+        const currentProgress = JSON.parse(localStorage.getItem(progressKey) || '[]');
+        const updatedProgress = currentProgress.filter(step => step !== stepNumber);
+        localStorage.setItem(progressKey, JSON.stringify(updatedProgress));
+      } else {
+        // Mark as completed
+        stepItem.classList.add('completed');
+        console.log(`Step ${stepNumber} marked as completed`);
+        saveProgressToSheets(moduleId, stepNumber);
+      }
+      
+      updateModuleProgress(moduleId);
+    }
+
+    function getStudentCode() {
+      if (currentUser && currentUser.code) {
+        return currentUser.code;
+      }
+      
+      // Try to find existing temporary code
+      const keys = Object.keys(localStorage);
+      const progressKey = keys.find(key => key.startsWith('progress_TEMP_'));
+      if (progressKey) {
+        return progressKey.split('_')[1] + '_' + progressKey.split('_')[2];
+      }
+      
+      return 'TEMP_' + Date.now().toString(36);
+    }
+
+    function updateModuleProgress(moduleId) {
+      const moduleCard = document.querySelector(`[data-module-id="${moduleId}"]`);
+      const stepItems = moduleCard.querySelectorAll('.step-item');
+      const completedSteps = moduleCard.querySelectorAll('.step-item.completed');
+      
+      const progressPercentage = Math.round((completedSteps.length / stepItems.length) * 100);
+      
+      // Update progress indicator
+      const progressIndicator = moduleCard.querySelector('.progress-indicator');
+      progressIndicator.textContent = progressPercentage + '%';
+      
+      // Update progress indicator color based on completion
+      if (progressPercentage === 100) {
+        progressIndicator.style.background = 'var(--accent-green)';
+      } else if (progressPercentage > 0) {
+        progressIndicator.style.background = 'var(--orange)';
+      } else {
+        progressIndicator.style.background = 'var(--gray-400)';
+      }
+    }
+
+    async function loadModuleProgress(moduleId) {
+      console.log(`Loading progress for module: ${moduleId}`);
+      
+      let studentCode = 'GUEST';
+      if (currentUser && currentUser.code) {
+        studentCode = currentUser.code;
+      } else {
+        // Try to find existing temporary code in localStorage
+        const keys = Object.keys(localStorage);
+        const progressKey = keys.find(key => key.startsWith('progress_') && key.includes(moduleId));
+        if (progressKey) {
+          studentCode = progressKey.split('_')[1];
+        } else {
+          studentCode = 'TEMP_' + Date.now().toString(36);
+        }
+      }
+
+      // First try to load from localStorage
+      const progressKey = `progress_${studentCode}_${moduleId}`;
+      const localProgress = JSON.parse(localStorage.getItem(progressKey) || '[]');
+      
+      // Apply local progress immediately
+      localProgress.forEach(stepNumber => {
+        const stepItem = document.querySelector(`[data-module-id="${moduleId}"] .step-item[data-step="${stepNumber}"]`);
+        if (stepItem && !stepItem.classList.contains('completed')) {
+          stepItem.classList.add('completed');
+        }
+      });
+      
+      // Update progress indicator
+      if (localProgress.length > 0) {
+        updateModuleProgress(moduleId);
+      }
+
+      // Try to load from Google Sheets if available
+      if (SCRIPT_URL) {
+        try {
+          const url = `${SCRIPT_URL}?progress=true&code=${studentCode}`;
+          const response = await fetch(url);
+          const result = await response.json();
+          
+          if (result && Array.isArray(result)) {
+            // Find progress for this specific module
+            const moduleProgress = result.find(p => p.moduleId === moduleId);
+            if (moduleProgress && moduleProgress.stepsCompleted) {
+              const completedSteps = moduleProgress.stepsCompleted.split(',').map(s => parseInt(s));
+              completedSteps.forEach(stepNumber => {
+                const stepItem = document.querySelector(`[data-module-id="${moduleId}"] .step-item[data-step="${stepNumber}"]`);
+                if (stepItem && !stepItem.classList.contains('completed')) {
+                  stepItem.classList.add('completed');
+                }
+              });
+              
+              // Sync with localStorage
+              localStorage.setItem(progressKey, JSON.stringify(completedSteps));
+              updateModuleProgress(moduleId);
+              console.log('Progress loaded from Google Sheets:', completedSteps);
+            }
+          }
+        } catch (error) {
+          console.log('Could not load progress from Google Sheets, using local storage:', error);
+        }
+      }
+    }
+
+    function saveProgressToSheets(moduleId, stepNumber) {
+      if (!SCRIPT_URL) {
+        console.log('Cannot save progress: SCRIPT_URL not configured');
+        return;
+      }
+
+      // Generate a student code if currentUser doesn't exist
+      let studentCode = 'GUEST';
+      if (currentUser && currentUser.code) {
+        studentCode = currentUser.code;
+      } else {
+        // Generate a temporary student code based on browser session
+        studentCode = 'TEMP_' + Date.now().toString(36);
+        console.log('Using temporary student code:', studentCode);
+      }
+
+      // Use POST request with JSON data as your Apps Script expects
+      const data = {
+        action: "updateProgress",
+        studentCode: studentCode,
+        moduleId: moduleId,
+        stepNumber: stepNumber,
+        totalSteps: 4,
+        stepName: `Step ${stepNumber}`
+      };
+
+      console.log('Saving progress data:', data);
+
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.text())
+      .then(result => {
+        console.log('Progress saved successfully:', result);
+        
+        // Save progress locally as backup
+        const progressKey = `progress_${studentCode}_${moduleId}`;
+        const currentProgress = JSON.parse(localStorage.getItem(progressKey) || '[]');
+        if (!currentProgress.includes(stepNumber)) {
+          currentProgress.push(stepNumber);
+          localStorage.setItem(progressKey, JSON.stringify(currentProgress));
+          console.log('Progress also saved locally');
+        }
+      })
+      .catch(error => {
+        console.error('Error saving progress to sheets:', error);
+        
+        // Save to localStorage as fallback
+        const progressKey = `progress_${studentCode}_${moduleId}`;
+        const currentProgress = JSON.parse(localStorage.getItem(progressKey) || '[]');
+        if (!currentProgress.includes(stepNumber)) {
+          currentProgress.push(stepNumber);
+          localStorage.setItem(progressKey, JSON.stringify(currentProgress));
+          console.log('Progress saved to local storage as fallback');
+        }
+      });
+    }
+
+    // Game functions
+    function openGameInPopup(gameLink, moduleName, moduleId) {
+      const gameContainer = document.getElementById(`game-${moduleId}`);
+      const iframe = gameContainer.querySelector('.game-iframe');
+      
+      iframe.src = gameLink;
+      gameContainer.style.display = 'block';
+      
+      // Scroll to game container
+      gameContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function closeGame(moduleId) {
+      const gameContainer = document.getElementById(`game-${moduleId}`);
+      const iframe = gameContainer.querySelector('.game-iframe');
+      
+      iframe.src = '';
+      gameContainer.style.display = 'none';
+    }
+
+    function showComingSoon() {
+      alert('🎮 This game is coming soon! We\'re working hard to bring you exciting learning activities.');
+    }
+
+    // Enhanced quiz function with interactive quiz
+    function startQuiz(moduleId, moduleName) {
+      const quizContainer = document.getElementById(`quiz-${moduleId}`);
+      const quizContent = quizContainer.querySelector('.quiz-content');
+      
+      // Generate quiz content based on module
+      const quizData = getQuizData(moduleId, moduleName);
+      
+      quizContent.innerHTML = generateQuizHTML(quizData, moduleId);
+      quizContainer.style.display = 'block';
+      
+      // Scroll to quiz container
+      quizContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function closeQuiz(moduleId) {
+      const quizContainer = document.getElementById(`quiz-${moduleId}`);
+      quizContainer.style.display = 'none';
+    }
+
+    function getQuizData(moduleId, moduleName) {
+      // Sample quiz data - this would eventually come from Google Sheets
+      const quizzes = {
+        'Y6M-W1-PlaceValue': {
+          title: 'Place Value Quiz',
+          questions: [
+            {
+              question: 'What is the place value of 7 in the number 47,832?',
+              options: ['Thousands', 'Hundreds', 'Tens', 'Units'],
+              correct: 0
+            },
+            {
+              question: 'Which number has 6 in the ten thousands place?',
+              options: ['16,245', '61,245', '1,624', '2,461'],
+              correct: 1
+            },
+            {
+              question: 'What is 35,674 rounded to the nearest thousand?',
+              options: ['35,000', '36,000', '35,600', '35,700'],
+              correct: 1
+            }
+          ]
+        }
+      };
+      
+      return quizzes[moduleId] || {
+        title: `${moduleName} Quiz`,
+        questions: [
+          {
+            question: `Sample question about ${moduleName}`,
+            options: ['Option A', 'Option B', 'Option C', 'Option D'],
+            correct: 0
+          }
+        ]
+      };
+    }
+
+    function generateQuizHTML(quizData, moduleId) {
+      let html = `
+        <div class="quiz-header-content">
+          <h4>${quizData.title}</h4>
+          <p>Answer all questions to complete this section.</p>
+        </div>
+        <div class="quiz-questions">
+      `;
+      
+      quizData.questions.forEach((q, index) => {
+        html += `
+          <div class="quiz-question" data-question="${index}">
+            <h5>Question ${index + 1}: ${q.question}</h5>
+            <div class="quiz-options">
+        `;
+        
+        q.options.forEach((option, optIndex) => {
+          html += `
+            <label class="quiz-option">
+              <input type="radio" name="q${index}" value="${optIndex}" onchange="checkQuizAnswer('${moduleId}', ${index}, ${optIndex}, ${q.correct})">
+              <span>${option}</span>
+            </label>
+          `;
+        });
+        
+        html += `
+            </div>
+            <div class="quiz-feedback" id="feedback-${index}" style="display: none;"></div>
+          </div>
+        `;
+      });
+      
+      html += `
+        </div>
+        <div class="quiz-footer">
+          <button id="complete-quiz-${moduleId}" class="complete-quiz-btn" onclick="completeQuiz('${moduleId}')" disabled style="opacity: 0.6;">
+            Complete Quiz
+          </button>
+        </div>
+      `;
+      
+      return html;
+    }
+
+    function checkQuizAnswer(moduleId, questionIndex, selectedAnswer, correctAnswer) {
+      console.log('checkQuizAnswer called:', {moduleId, questionIndex, selectedAnswer, correctAnswer});
+      
+      // Initialize first attempt tracking
+      if (!window.firstAttempts) window.firstAttempts = {};
+      if (!window.firstAttempts[moduleId]) window.firstAttempts[moduleId] = {};
+      
+      const questionKey = `q${questionIndex}`;
+      
+      // Capture FIRST ATTEMPT (this is what gets saved to Google Sheets)
+      if (!window.firstAttempts[moduleId][questionKey]) {
+        // Get answer text for the first attempt using the quiz container's question structure
+        const quizContainer = document.getElementById(`quiz-${moduleId}`);
+        const allQuestions = quizContainer.querySelectorAll('.quiz-question');
+        const questionDiv = allQuestions[questionIndex];
+        
+        if (!questionDiv) {
+          console.error('Question div not found for index:', questionIndex);
+          return;
+        }
+        
+        const selectedOption = questionDiv.querySelector(`input[value="${selectedAnswer}"]`);
+        const correctOption = questionDiv.querySelector(`input[value="${correctAnswer}"]`);
+        
+        // Get text from the label/span next to the radio button
+        const selectedText = selectedOption ? 
+          (selectedOption.nextElementSibling ? selectedOption.nextElementSibling.textContent.trim() : 
+           selectedOption.parentElement.textContent.replace(/^\s*[A-D]\)\s*/, '').trim()) : 
+          `Option ${selectedAnswer}`;
+          
+        const correctText = correctOption ? 
+          (correctOption.nextElementSibling ? correctOption.nextElementSibling.textContent.trim() : 
+           correctOption.parentElement.textContent.replace(/^\s*[A-D]\)\s*/, '').trim()) : 
+          `Option ${correctAnswer}`;
+        
+        const questionTitle = questionDiv.querySelector('h5').textContent.trim();
+        
+        window.firstAttempts[moduleId][questionKey] = {
+          question: questionTitle,
+          selectedAnswer: selectedText,      // LOCKED - First attempt answer text
+          correctAnswer: correctText,
+          selectedIndex: selectedAnswer,     // LOCKED - First attempt index
+          correctIndex: correctAnswer,
+          isCorrect: selectedAnswer == correctAnswer,
+          timestamp: new Date().toISOString()
+        };
+        
+        console.log(`🔒 FIRST ATTEMPT LOCKED for Question ${questionIndex + 1}:`, {
+          selected: selectedText,
+          correct: correctText,
+          wasCorrect: selectedAnswer == correctAnswer
+        });
+      } else {
+        console.log(`📝 Subsequent attempt for Question ${questionIndex + 1} (first attempt already locked)`);
+      }
+      
+      // Show feedback based on CURRENT selection
+      const feedbackDiv = document.getElementById(`feedback-${questionIndex}`);
+      
+      if (selectedAnswer == correctAnswer) {
+        feedbackDiv.innerHTML = '✅ Correct!';
+        feedbackDiv.className = 'quiz-feedback correct';
+      } else {
+        feedbackDiv.innerHTML = '❌ Try again!';
+        feedbackDiv.className = 'quiz-feedback incorrect';
+      }
+      
+      feedbackDiv.style.display = 'block';
+      
+      // Check if all questions are answered (regardless of correctness for now)
+      const quizContainer = document.getElementById(`quiz-${moduleId}`);
+      const allQuestions = quizContainer.querySelectorAll('.quiz-question');
+      let allAnswered = true;
+      let answeredCount = 0;
+      
+      allQuestions.forEach((question, qIndex) => {
+        const radioButtons = question.querySelectorAll('input[type="radio"]');
+        let questionAnswered = false;
+        radioButtons.forEach(radio => {
+          if (radio.checked) questionAnswered = true;
+        });
+        if (questionAnswered) answeredCount++;
+        if (!questionAnswered) allAnswered = false;
+        console.log(`Question ${qIndex + 1} answered:`, questionAnswered);
+      });
+      
+      console.log(`Quiz progress: ${answeredCount}/${allQuestions.length} questions answered`);
+      
+      // Enable complete button if all questions are answered
+      const completeBtn = document.getElementById(`complete-quiz-${moduleId}`);
+      if (completeBtn) {
+        if (allAnswered) {
+          completeBtn.disabled = false;
+          completeBtn.style.opacity = '1';
+          completeBtn.style.cursor = 'pointer';
+          completeBtn.style.background = 'var(--accent-green)';
+          console.log('All questions answered, enabling complete button');
+        } else {
+          completeBtn.disabled = true;
+          completeBtn.style.opacity = '0.6';
+          completeBtn.style.cursor = 'not-allowed';
+          completeBtn.style.background = 'var(--gray-400)';
+          console.log('Not all questions answered yet');
+        }
+      } else {
+        console.error('Complete button not found:', `complete-quiz-${moduleId}`);
+      }
+    }
+
+    function completeQuiz(moduleId) {
+      console.log('🎯 Completing quiz - using FIRST ATTEMPT data for Google Sheets');
+      
+      // Use the locked first attempts for Google Sheets submission
+      const firstAttempts = window.firstAttempts && window.firstAttempts[moduleId] ? window.firstAttempts[moduleId] : {};
+      const responses = [];
+      let correctCount = 0;
+      
+      // Convert first attempts to response format
+      Object.keys(firstAttempts).forEach(questionKey => {
+        const attempt = firstAttempts[questionKey];
+        
+        if (attempt.isCorrect) {
+          correctCount++;
+        }
+        
+        responses.push({
+          question: attempt.question,
+          studentAnswer: attempt.selectedAnswer,  // FIRST attempt answer text
+          correctAnswer: attempt.correctAnswer,
+          selectedIndex: attempt.selectedIndex,   // FIRST attempt index
+          correctIndex: attempt.correctIndex,
+          isCorrect: attempt.isCorrect
+        });
+        
+        console.log(`📊 Question: "${attempt.question}" - First attempt: "${attempt.selectedAnswer}" (${attempt.isCorrect ? '✅' : '❌'})`);
+      });
+      
+      // Fallback: If no first attempts recorded, use current selections
+      if (responses.length === 0) {
+        console.warn('⚠️ No first attempts found, falling back to current selections');
+        const quizContainer = document.getElementById(`quiz-${moduleId}`);
+        const questions = quizContainer.querySelectorAll('.quiz-question');
+        
+        questions.forEach((question, index) => {
+          const selectedRadio = question.querySelector('input[type="radio"]:checked');
+          const questionText = question.querySelector('h5').textContent.replace(`Question ${index + 1}: `, '');
+          
+          if (selectedRadio) {
+            const selectedAnswerIndex = parseInt(selectedRadio.value);
+            const selectedAnswerText = selectedRadio.parentElement.querySelector('span').textContent;
+            
+            const onchangeAttr = selectedRadio.getAttribute('onchange');
+            const correctAnswerMatch = onchangeAttr.match(/checkQuizAnswer\('.*?', \d+, \d+, (\d+)\)/);
+            const correctAnswerIndex = correctAnswerMatch ? parseInt(correctAnswerMatch[1]) : 0;
+            
+            const correctRadio = question.querySelector(`input[type="radio"][value="${correctAnswerIndex}"]`);
+            const correctAnswerText = correctRadio ? correctRadio.parentElement.querySelector('span').textContent : '';
+            
+            const isCorrect = selectedAnswerIndex === correctAnswerIndex;
+            if (isCorrect) correctCount++;
+            
+            responses.push({
+              question: questionText,
+              studentAnswer: selectedAnswerText,
+              correctAnswer: correctAnswerText,
+              selectedIndex: selectedAnswerIndex,
+              correctIndex: correctAnswerIndex,
+              isCorrect: isCorrect
+            });
+          }
+        });
+      }
+      
+      console.log(`📈 Quiz completion summary: ${correctCount}/${responses.length} correct (using first attempts)`);
+      
+      // Save quiz results to Google Sheets (now contains first attempt data)
+      saveQuizResults(moduleId, responses, correctCount, responses.length);
+      
+      // Mark step complete
+      markStepComplete(moduleId, 4);
+      closeQuiz(moduleId);
+      
+      // Clear first attempts for this module (ready for next quiz)
+      if (window.firstAttempts && window.firstAttempts[moduleId]) {
+        delete window.firstAttempts[moduleId];
+        console.log('🧹 Cleared first attempts data for next quiz');
+      }
+      
+      // Success message will be shown by saveQuizResults function
+    }
+
+    function showSuccessMessage(message) {
+      // Create success modal
+      const modal = document.createElement('div');
+      modal.className = 'success-modal-overlay';
+      modal.innerHTML = `
+        <div class="success-modal">
+          <div class="success-icon">🎉</div>
+          <h3>Congratulations!</h3>
+          <p>${message}</p>
+          <button class="success-btn" onclick="closeSuccessModal()">Continue Learning</button>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      // Show with animation
+      setTimeout(() => {
+        modal.style.opacity = '1';
+      }, 10);
+      
+      // Auto-close after 5 seconds
+      setTimeout(() => {
+        closeSuccessModal();
+      }, 5000);
+    }
+
+    function closeSuccessModal() {
+      const modal = document.querySelector('.success-modal-overlay');
+      if (modal) {
+        modal.style.opacity = '0';
+        setTimeout(() => {
+          modal.remove();
+        }, 300);
+      }
+    }
+
+    function saveQuizResults(moduleId, responses, score, totalQuestions) {
+      if (!SCRIPT_URL) {
+        console.log('Cannot save quiz results: SCRIPT_URL not configured');
+        return;
+      }
+
+      let studentCode = 'GUEST';
+      let studentName = 'Guest Student';
+      
+      if (currentUser && currentUser.code) {
+        studentCode = currentUser.code;
+        studentName = currentUser.name || studentCode;
+      } else {
+        studentCode = getStudentCode();
+      }
+
+      // Use GET request to avoid CORS issues
+      const params = new URLSearchParams({
+        action: 'saveQuiz',
+        code: studentCode,
+        moduleId: moduleId,
+        score: score,
+        totalQuestions: totalQuestions,
+        responses: encodeURIComponent(JSON.stringify(responses))
+      });
+
+      const url = `${SCRIPT_URL}?${params.toString()}`;
+      console.log('Saving quiz results via GET:', url);
+
+      // Test connection first
+      console.log('🧪 Testing connection...');
+      fetch(`${SCRIPT_URL}?test=connection`)
+        .then(r => r.json())
+        .then(testResult => {
+          console.log('Connection test:', testResult);
+          
+          // Now try the actual quiz submission
+          return fetch(url);
+        })
+        .then(response => {
+          console.log('Quiz Response status:', response.status);
+          return response.text(); // Get as text first to see raw response
+        })
+        .then(rawResponse => {
+          console.log('Raw response:', rawResponse);
+          
+          // Try to parse as JSON
+          let result;
+          try {
+            result = JSON.parse(rawResponse);
+          } catch (e) {
+            console.error('Failed to parse response as JSON:', e);
+            result = { success: false, message: 'Invalid response format: ' + rawResponse };
+          }
+          
+          console.log('Parsed quiz submission response:', result);
+          if (result && result.success) {
+            console.log('Quiz results saved successfully to Google Sheets');
+            showSuccessMessage(`🎉 Quiz completed! Score: ${score}/${totalQuestions} - Results saved!`);
+          } else {
+            const errorMsg = result && result.message ? result.message : 'Response parsing failed - check console';
+            console.error('Failed to save quiz results:', errorMsg, result);
+            showSuccessMessage(`⚠️ Quiz completed! Score: ${score}/${totalQuestions} - Save failed: ${errorMsg}`);
+          }
+        })
+      .catch(error => {
+        console.error('Error saving quiz results:', error);
+        showSuccessMessage(`✅ Quiz completed locally! Score: ${score}/${totalQuestions} - Connection error`);
+      });
+    }
+  </script>
+</body>
+</html>

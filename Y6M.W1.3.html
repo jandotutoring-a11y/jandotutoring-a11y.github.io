@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Y6M.W1.3 – Fraction Pizza</title>
+  <link rel="stylesheet" href="shared-styles.css">
+  <style>
+    /* ONLY game-specific styles - NO header/footer/auth styles */
+    .feedback-msg {
+      display: none;
+      margin-top: 18px;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 18px;
+      color: var(--dark-blue);
+      background: #f7faff;
+      border: 3px solid transparent;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .feedback-msg.correct {
+      border-color: #32CD32;
+      background: #eafbe7;
+    }
+    .feedback-msg.incorrect {
+      border-color: #E15C31;
+      background: #ffeae7;
+    }
+
+    .container {
+      min-height: auto;
+      height: auto;
+      overflow: visible;
+    }
+
+    #startBtn:hover {
+      background: #d14a1f;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(225, 92, 49, 0.3);
+    }
+
+    #gameArea {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: var(--white);
+      border-radius: 1rem;
+      box-shadow: var(--shadow-lg);
+      min-height: auto;
+      height: auto;
+    }
+
+    .pizza-container {
+      width: 300px;
+      height: 300px;
+      margin: 2rem auto;
+      position: relative;
+      background: #f4d03f;
+      border-radius: 50%;
+      border: 8px solid #d68910;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .pizza-container:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    .pizza-slice {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      top: 50%;
+      left: 50%;
+      transform-origin: 0 0;
+      border-left: 3px solid #8b4513;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .pizza-slice.visible {
+      opacity: 1;
+    }
+
+    .pizza-toppings {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,0,0,0.3) 20%, transparent 20%),
+                  radial-gradient(circle, rgba(0,128,0,0.3) 15%, transparent 15%),
+                  radial-gradient(circle, rgba(255,255,0,0.3) 10%, transparent 10%);
+      background-size: 40px 40px, 35px 35px, 30px 30px;
+      background-position: 20px 30px, 50px 80px, 100px 60px;
+      pointer-events: none;
+    }
+
+    .fraction-display {
+      text-align: center;
+      font-size: 3rem;
+      font-weight: bold;
+      color: var(--dark-blue);
+      margin: 1rem 0;
+    }
+
+    .slice-counter {
+      text-align: center;
+      font-size: 1.2rem;
+      color: var(--gray-600);
+      margin: 1rem 0;
+    }
+
+    .question-text {
+      text-align: center;
+      font-size: 1.4rem;
+      color: var(--dark-blue);
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: var(--light-blue);
+      border-radius: 0.5rem;
+    }
+
+    #submitBtn, #nextBtn {
+      margin: 1.5rem auto;
+      display: block;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: var(--orange);
+      color: white;
+      font-weight: 600;
+    }
+
+    #submitBtn:hover, #nextBtn:enabled:hover {
+      background: #d14a1f;
+      transform: translateY(-2px);
+    }
+
+    #nextBtn:disabled {
+      background: var(--gray-400);
+      color: var(--gray-600);
+      cursor: not-allowed;
+    }
+
+    #nextBtn:enabled {
+      background: var(--orange);
+      color: white;
+      cursor: pointer;
+    }
+
+    #progress {
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: var(--gray-50);
+      border-radius: 0.5rem;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10000;
+    }
+
+    @keyframes confetti-fall {
+      0% { 
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+      }
+      100% { 
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-10deg); }
+      75% { transform: rotate(10deg); }
+    }
+
+    /* Modal styles */
+    #rewardModal {
+      display: none;
+      position: fixed;
+      z-index: 1001;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+
+    #rewardModalContent {
+      background-color: var(--white);
+      margin: 15% auto;
+      padding: 2rem;
+      border-radius: 1rem;
+      width: 400px;
+      max-width: 90%;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .closeModal {
+      color: var(--gray-500);
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      position: absolute;
+      top: 10px;
+      right: 15px;
+    }
+
+    .closeModal:hover {
+      color: var(--dark-blue);
+    }
+
+    #rewardDisplay {
+      font-size: 4rem;
+      margin: 1rem 0;
+      padding: 1rem;
+      border: 3px dashed var(--orange);
+      border-radius: 1rem;
+      display: inline-block;
+      min-width: 100px;
+      transition: all 0.3s ease;
+    }
+
+    #rewardDisplay:hover {
+      background: var(--light-blue);
+      transform: scale(1.1);
+    }
+
+    .modalButton {
+      background: var(--dark-blue);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      margin: 0.5rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .modalButton:hover {
+      background: #1a1f5a;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <!-- Authentication Modal -->
+  <div id="authModal">
+    <div id="authModalContent">
+      <h2>Welcome to Jando EDU!</h2>
+      <p>Please enter your unique student code to access your games and track your progress.</p>
+      <input type="text" id="studentCodeInput" placeholder="Enter your student code" maxlength="20">
+      <div id="authError" style="display: none; color: var(--accent-red); margin: 0.5rem 0; font-size: 0.875rem;"></div>
+      <button id="authLoginBtn" onclick="jandoAuth.authenticateUser()">Login</button>
+    </div>
+  </div>
+
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <img src="https://i.imgur.com/QIdMEsB.png" alt="Jando EDU Logo" class="logo">
+      </div>
+      <div class="header-right">
+        <span id="userGreeting" style="display: none;"></span>
+        <div class="menu-container">
+          <button id="menuBtn" class="menu-button">☰ Menu</button>
+          <div id="menuDropdown" class="menu-dropdown">
+            <a href="index.html" class="menu-item">Home</a>
+            <a href="learning-hub.html" class="menu-item">Learning Hub</a>
+            <a href="games.html" class="menu-item">Games</a>
+            <a href="reward.html" class="menu-item">My Rewards</a>
+            <button class="menu-logout" onclick="jandoAuth.logout()">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div id="loading" style="display: none;">
+      <img src="https://i.imgur.com/KpZ3dFx.gif" alt="Loading...">
+      <span>Loading, please wait...</span>
+    </div>
+
+    <!-- Instructions Section -->
+    <div id="instructionsArea" style="text-align: center; max-width: 600px; margin: 2rem auto;">
+      <h2 id="greeting" style="color: var(--dark-blue); margin-bottom: 1.5rem;"></h2>
+      <div style="background: var(--white); padding: 2rem; border-radius: 1rem; box-shadow: var(--shadow-lg); margin-bottom: 2rem;">
+        <h3 style="color: var(--orange); margin-bottom: 1rem;">🍕 How to Play Fraction Pizza</h3>
+        <ul style="text-align: left; color: var(--dark-blue); font-size: 1.1rem; line-height: 1.6;">
+          <li>Click on the pizza to slice it into equal parts</li>
+          <li>Watch the fraction change as you add slices</li>
+          <li>Answer questions about the fractions you create</li>
+          <li>Get 4 out of 5 correct to earn a reward! 🎁</li>
+        </ul>
+      </div>
+      <button id="startBtn" onclick="startCountdown()" style="
+        background: var(--orange);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      ">🚀 Start Game</button>
+    </div>
+
+    <div id="countdown" style="display: none;"></div>
+
+    <div id="gameArea" style="display: none;">
+      <div id="progress"></div>
+      <div class="question-text" id="question"></div>
+      
+      <div class="pizza-container" id="pizzaContainer" onclick="slicePizza()">
+        <div class="pizza-toppings"></div>
+      </div>
+      
+      <div class="fraction-display" id="fractionDisplay">0/1</div>
+      <div class="slice-counter" id="sliceCounter">Click the pizza to slice it!</div>
+      
+      <button id="submitBtn" onclick="submitAnswer()" style="display: none;">Submit Answer</button>
+      <button id="nextBtn" onclick="nextQuestion()" style="display: none;" disabled>Next</button>
+      <div id="feedback" class="feedback-msg"></div>
+    </div>
+
+    <div id="result" style="text-align: center; margin: 2rem 0; font-size: 1.2rem;"></div>
+    <div id="uploadStatus" style="text-align: center; margin: 1rem 0;"></div>
+  </div>
+
+  <!-- Reward Modal -->
+  <div id="rewardModal">
+    <div id="rewardModalContent">
+      <span class="closeModal" onclick="closeRewardModal()">&times;</span>
+      <h2 style="color: var(--dark-blue); margin-bottom: 10px;">🎉 Congratulations! 🎉</h2>
+      <p id="rewardMessage" style="font-size: 20px; margin-bottom: 20px;">Click the present to reveal your reward!</p>
+      <div id="rewardDisplay" onclick="revealReward()" style="cursor: pointer;">🎁</div>
+      <div style="display: none; text-align: center; margin-top: 20px;" id="rewardButtons">
+        <button class="modalButton" onclick="closeRewardModal()" id="closeRewardBtn" style="margin: 0 0.5rem;">Awesome!</button>
+        <button class="modalButton" onclick="window.location.href='games.html'" style="background: var(--orange); margin: 0 0.5rem;">🏠 Return to Games</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Modal -->
+  <div id="loadingModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 1rem; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+      <img src="https://i.imgur.com/KpZ3dFx.gif" alt="Loading..." style="width: 60px; height: 60px; margin-bottom: 1rem;">
+      <h3 style="color: var(--dark-blue); margin-bottom: 0.5rem;">Uploading Results...</h3>
+      <p style="color: var(--gray-600); font-size: 0.9rem;">Please wait while we save your progress</p>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2025 Jando EDU. All rights reserved. | <a href="https://www.jandotutoring.com/privacy-policy" target="_blank">Privacy Policy</a> | <a href="https://www.jandotutoring.com/contact-us" target="_blank">Contact</a></p>
+    </div>
+  </footer>
+
+  <script src="auth.js"></script>
+  <script>
+    // Game variables
+    let code, studentName;
+    let currentQuestion = -1;
+    let score = 0;
+    let responses = [];
+    let totalQuestions = 5;
+    let gameName = "Y6M.W1.3 - Fraction Pizza";
+    let sheetName = "Y6M.W1.3";
+    let answerSubmitted = false;
+    let currentSlices = 0;
+    let shadedSlices = 0; // NEW: Track how many slices are shaded
+    let targetFraction = { numerator: 0, denominator: 1 };
+    
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzwNZGb_nRFF9t4lLdJdbII1kuDKhsiy4_liBxOe3pNc6rWP7swfem33C_ALT3OWQ9GoQ/exec";
+    const animals = ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🐔","🐧","🐦","🐤","🐣","🐺","🦉","🦅","🦆","🐴","🦄","🐝","🐛","🦋","🐌","🐞","🐜","🦗","🕷️","🦂","🐢","🐍","🦎","🐙","🦑","🦐","🦀","🐡","🐠","🐟","🐬","🐳","🐋","🦈","🐊","🐅","🐆","🦓","🦏","🐘","🦒","🦘","🐪","🐫","🦙","🐑","🐐","🐎","🐖","🐄","🐃","🐂","🐏","🦌","🐕","🐩","🐈","🐓","🦃","🕊️","🐇","🐁","🐀"];
+    let currentReward = "";
+
+    function startGame() {
+      document.getElementById("greeting").innerText = `Hi, ${studentName}!`;
+      document.getElementById("instructionsArea").style.display = "block";
+      
+      document.getElementById("countdown").style.display = "none";
+      document.getElementById("gameArea").style.display = "none";
+      document.getElementById("result").innerText = "";
+      document.getElementById("uploadStatus").innerText = "";
+      
+      currentQuestion = -1; 
+      score = 0;
+      responses = [];
+    }
+
+    function startCountdown() {
+      document.getElementById("instructionsArea").style.display = "none";
+      
+      let countdown = 3;
+      const countdownDiv = document.getElementById("countdown");
+      countdownDiv.style.display = "block";
+      countdownDiv.style.textAlign = "center";
+      countdownDiv.style.fontSize = "3rem";
+      countdownDiv.style.color = "var(--orange)";
+      countdownDiv.style.fontWeight = "bold";
+      countdownDiv.style.margin = "2rem 0";
+      countdownDiv.innerText = countdown;
+
+      const interval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          countdownDiv.innerText = countdown;
+        } else {
+          countdownDiv.innerText = "GO!";
+          setTimeout(() => {
+            clearInterval(interval);
+            countdownDiv.style.display = "none";
+            document.getElementById("gameArea").style.display = "block";
+            showExample();
+          }, 500);
+        }
+      }, 1000);
+    }
+
+    function showExample() {
+      answerSubmitted = false;
+      currentSlices = 0;
+      shadedSlices = 0;
+      clearPizzaSlices();
+      
+      document.getElementById("question").innerText = "Example: First slice the pizza into 4 parts, then click slices to shade 3 of them to make 3/4";
+      document.getElementById("fractionDisplay").innerText = "0/1";
+      document.getElementById("sliceCounter").innerText = "Step 1: Click the pizza to slice it into 4 parts";
+      document.getElementById("progress").innerText = "Example Question";
+      document.getElementById("submitBtn").style.display = "none";
+      document.getElementById("nextBtn").style.display = "none";
+      showFeedback("", "");
+      
+      targetFraction = { numerator: 3, denominator: 4 };
+    }
+
+    function slicePizza() {
+      if (answerSubmitted) return;
+      
+      // If we're in shading mode, ignore pizza clicks
+      if (currentSlices > 0 && currentSlices === targetFraction.denominator) return;
+      
+      currentSlices++;
+      if (currentSlices > 8) currentSlices = 8; // Max 8 slices
+      
+      updatePizzaDisplay();
+    }
+
+    function updatePizzaDisplay() {
+      const container = document.getElementById("pizzaContainer");
+      clearPizzaSlices();
+      
+      if (currentSlices === 0) {
+        document.getElementById("fractionDisplay").innerText = "0/1";
+        document.getElementById("sliceCounter").innerText = "Click the pizza to slice it!";
+        return;
+      }
+      
+      // Create slices
+      for (let i = 0; i < currentSlices; i++) {
+        const slice = document.createElement("div");
+        slice.className = "pizza-slice visible";
+        slice.style.transform = `rotate(${(360 / currentSlices) * i}deg)`;
+        
+        // Make slices clickable for shading if we have the right number of slices
+        if (currentSlices === targetFraction.denominator) {
+          slice.style.cursor = "pointer";
+          slice.onclick = (e) => {
+            e.stopPropagation();
+            toggleSliceShading(slice, i);
+          };
+          
+          // Shade slice if it should be shaded
+          if (i < shadedSlices) {
+            slice.style.backgroundColor = "rgba(255, 0, 0, 0.6)"; // Red shading
+            slice.classList.add("shaded");
+          }
+        }
+        
+        container.appendChild(slice);
+      }
+      
+      // Update display based on current state
+      if (currentSlices < targetFraction.denominator) {
+        document.getElementById("fractionDisplay").innerText = `0/${currentSlices}`;
+        document.getElementById("sliceCounter").innerText = `Keep clicking to make ${targetFraction.denominator} slices total`;
+      } else if (currentSlices === targetFraction.denominator) {
+        document.getElementById("fractionDisplay").innerText = `${shadedSlices}/${currentSlices}`;
+        document.getElementById("sliceCounter").innerText = `Now click individual slices to shade ${targetFraction.numerator} of them`;
+        
+        // Show submit button if we have the right amount shaded
+        if (shadedSlices === targetFraction.numerator) {
+          if (currentQuestion >= 0) {
+            document.getElementById("submitBtn").style.display = "block";
+          } else {
+            // Example complete
+            document.getElementById("submitBtn").style.display = "block";
+          }
+        }
+      } else {
+        // Too many slices
+        document.getElementById("fractionDisplay").innerText = `${shadedSlices}/${currentSlices}`;
+        document.getElementById("sliceCounter").innerText = `Too many slices! You need exactly ${targetFraction.denominator} slices. Click "Try Again"`;
+        showTryAgainButton();
+      }
+    }
+
+    function toggleSliceShading(slice, index) {
+      if (slice.classList.contains("shaded")) {
+        // Unshade this slice and all slices after it
+        for (let i = index; i < currentSlices; i++) {
+          const sliceElement = document.querySelectorAll(".pizza-slice")[i];
+          sliceElement.style.backgroundColor = "";
+          sliceElement.classList.remove("shaded");
+        }
+        shadedSlices = index;
+      } else {
+        // Shade this slice (and ensure all previous slices are shaded)
+        for (let i = 0; i <= index; i++) {
+          const sliceElement = document.querySelectorAll(".pizza-slice")[i];
+          sliceElement.style.backgroundColor = "rgba(255, 0, 0, 0.6)";
+          sliceElement.classList.add("shaded");
+        }
+        shadedSlices = index + 1;
+      }
+      
+      // Update display
+      document.getElementById("fractionDisplay").innerText = `${shadedSlices}/${currentSlices}`;
+      
+      // Show submit button if correct
+      if (shadedSlices === targetFraction.numerator && currentSlices === targetFraction.denominator) {
+        document.getElementById("submitBtn").style.display = "block";
+        document.getElementById("sliceCounter").innerText = `Perfect! You made ${shadedSlices}/${currentSlices}`;
+      } else {
+        document.getElementById("submitBtn").style.display = "none";
+        document.getElementById("sliceCounter").innerText = `Shade ${targetFraction.numerator} slices to make ${targetFraction.numerator}/${targetFraction.denominator}`;
+      }
+    }
+
+    function showTryAgainButton() {
+      if (document.getElementById("tryAgainBtn")) return; // Already exists
+      
+      const tryAgainBtn = document.createElement("button");
+      tryAgainBtn.id = "tryAgainBtn";
+      tryAgainBtn.innerText = "🔄 Try Again";
+      tryAgainBtn.onclick = resetQuestion;
+      tryAgainBtn.style.cssText = `
+        margin: 1rem auto;
+        display: block;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: var(--gray-500);
+        color: white;
+        font-weight: 600;
+      `;
+      
+      document.getElementById("gameArea").appendChild(tryAgainBtn);
+    }
+
+    function resetQuestion() {
+      // Remove try again button
+      const tryAgainBtn = document.getElementById("tryAgainBtn");
+      if (tryAgainBtn) tryAgainBtn.remove();
+      
+      // Reset state
+      answerSubmitted = false;
+      currentSlices = 0;
+      shadedSlices = 0;
+      
+      // Clear feedback
+      showFeedback("", "");
+      
+      // Hide buttons
+      document.getElementById("submitBtn").style.display = "none";
+      document.getElementById("nextBtn").style.display = "none";
+      
+      // Reset display
+      clearPizzaSlices();
+      document.getElementById("fractionDisplay").innerText = "0/1";
+      
+      if (currentQuestion >= 0) {
+        document.getElementById("sliceCounter").innerText = `Click the pizza to slice it into ${targetFraction.denominator} parts`;
+      } else {
+        document.getElementById("sliceCounter").innerText = "Step 1: Click the pizza to slice it into 4 parts";
+      }
+    }
+
+    function clearPizzaSlices() {
+      const slices = document.querySelectorAll(".pizza-slice");
+      slices.forEach(slice => slice.remove());
+    }
+
+    function submitAnswer() {
+      if (currentQuestion === -1) {
+        // Example question
+        nextQuestion();
+        return;
+      }
+      
+      answerSubmitted = true;
+      
+      // Check if the fraction is correct
+      const correct = (shadedSlices === targetFraction.numerator && currentSlices === targetFraction.denominator);
+      const studentAnswer = `${shadedSlices}/${currentSlices}`;
+      const correctAnswer = `${targetFraction.numerator}/${targetFraction.denominator}`;
+      
+      responses.push({
+        question: document.getElementById("question").innerText,
+        correct: correctAnswer,
+        answer: studentAnswer
+      });
+
+      document.getElementById("submitBtn").style.display = "none";
+
+      if (correct) {
+        score++;
+        showFeedback("Correct! Great job making the fraction!", "correct");
+        document.getElementById("nextBtn").style.display = "block";
+        document.getElementById("nextBtn").disabled = false;
+      } else {
+        showFeedback(`Not quite right. You made ${studentAnswer} but needed ${correctAnswer}. Click "Try Again" to practice more!`, "incorrect");
+        showTryAgainButton();
+      }
+    }
+
+    function nextQuestion() {
+      // Remove any existing try again button
+      const tryAgainBtn = document.getElementById("tryAgainBtn");
+      if (tryAgainBtn) tryAgainBtn.remove();
+      
+      currentQuestion++;
+      answerSubmitted = false;
+      currentSlices = 0;
+      shadedSlices = 0;
+
+      document.getElementById("submitBtn").style.display = "none";
+      document.getElementById("nextBtn").style.display = "none";
+
+      if (currentQuestion >= totalQuestions) {
+        endGame();
+        return;
+      }
+
+      clearPizzaSlices();
+      
+      // Generate random fraction question
+      const denominators = [2, 3, 4, 6, 8];
+      const denominator = denominators[Math.floor(Math.random() * denominators.length)];
+      const numerator = Math.floor(Math.random() * denominator) + 1;
+      
+      targetFraction = { numerator: numerator, denominator: denominator };
+      
+      document.getElementById("question").innerText = 
+        `Make the fraction ${numerator}/${denominator} by slicing the pizza and shading parts`;
+      document.getElementById("fractionDisplay").innerText = "0/1";
+      document.getElementById("sliceCounter").innerText = `Click the pizza to slice it into ${denominator} parts`;
+      document.getElementById("progress").innerText = 
+        `Question ${currentQuestion + 1} of ${totalQuestions}`;
+      showFeedback("", "");
+    }
+
+    function showFeedback(message, type) {
+      const feedback = document.getElementById("feedback");
+      feedback.innerText = message;
+      feedback.className = "feedback-msg " + type;
+      feedback.style.display = message ? "block" : "none";
+    }
+
+    function endGame() {
+      document.getElementById("gameArea").style.display = "none";
+      document.getElementById("result").innerText = 
+        `Game Over. You scored ${score} out of ${totalQuestions}.`;
+
+      document.getElementById("loadingModal").style.display = "block";
+
+      const payload = {
+        code: code,
+        score: score,
+        game: gameName,
+        sheet: sheetName,
+        responses: responses
+      };
+
+      fetch(scriptURL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(() => {
+        document.getElementById("loadingModal").style.display = "none";
+        document.getElementById("uploadStatus").style.color = "green";
+        document.getElementById("uploadStatus").innerText = "Results submitted successfully.";
+        
+        setTimeout(() => {
+          if (score / totalQuestions >= 0.8) { 
+            giveReward(); 
+          } else {
+            showReturnHomeButton();
+          }
+        }, 500);
+      })
+      .catch(() => {
+        document.getElementById("loadingModal").style.display = "none";
+        document.getElementById("uploadStatus").style.color = "red";
+        document.getElementById("uploadStatus").innerText = "Could not submit results.";
+        showReturnHomeButton();
+      });
+    }
+
+    function showReturnHomeButton() {
+      if (document.querySelector('.return-home-btn')) return;
+      
+      const returnBtn = document.createElement('button');
+      returnBtn.className = 'return-home-btn';
+      returnBtn.innerHTML = '🏠 Return to Games';
+      returnBtn.style.cssText = `
+        margin: 2rem auto;
+        padding: 1rem 2rem;
+        display: block;
+        background: var(--orange);
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      `;
+      returnBtn.onmouseover = () => returnBtn.style.transform = 'translateY(-2px)';
+      returnBtn.onmouseout = () => returnBtn.style.transform = 'translateY(0)';
+      returnBtn.onclick = () => window.location.href = 'games.html';
+      
+      document.getElementById("result").appendChild(returnBtn);
+    }
+
+    function giveReward() {
+      fetch(scriptURL + "?rewards=" + encodeURIComponent(code))
+        .then(res => res.json())
+        .then(data => {
+          let currentRewards = Array.isArray(data.rewards) ? data.rewards : (data.rewards ? data.rewards.split(",") : []);
+          let available = animals.filter(a => !currentRewards.includes(a));
+          if (available.length === 0) {
+            document.getElementById("uploadStatus").innerText = "You've collected all the animals! 🎉";
+            showReturnHomeButton();
+            return;
+          }
+          currentReward = available[Math.floor(Math.random() * available.length)];
+          
+          document.getElementById("rewardModal").style.display = "block";
+          document.getElementById("rewardDisplay").innerText = "🎁";
+          document.getElementById("rewardMessage").innerText = "Click the present to reveal your reward!";
+          document.getElementById("rewardButtons").style.display = "none";
+          
+          fetch(scriptURL, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify({ code: code, reward: currentReward }),
+            headers: { "Content-Type": "application/json" }
+          });
+        })
+        .catch(err => {
+          console.error("Reward error:", err);
+          document.getElementById("uploadStatus").innerText = "⚠️ Could not fetch rewards.";
+          showReturnHomeButton();
+        });
+    }
+
+    function revealReward() {
+      document.getElementById("rewardDisplay").innerText = currentReward;
+      document.getElementById("rewardDisplay").style.animation = "wiggle 2s infinite";
+      document.getElementById("rewardMessage").innerText = "🎉 You earned a new animal friend! 🎉";
+      document.getElementById("rewardButtons").style.display = "block";
+      
+      document.getElementById("rewardDisplay").onclick = null;
+      document.getElementById("rewardDisplay").style.cursor = "default";
+      
+      for (let i = 0; i < 50; i++) {
+        let confetti = document.createElement("div");
+        confetti.className = "confetti";
+        confetti.style.left = Math.random() * 100 + "vw";
+        confetti.style.backgroundColor = ["#E15C31","#A6BFFF","#22277A","#FFD700","#32CD32"][Math.floor(Math.random()*5)];
+        confetti.style.animationDuration = (2 + Math.random() * 3) + "s";
+        confetti.style.animation = "confetti-fall " + (2 + Math.random() * 3) + "s linear forwards";
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 5000);
+      }
+    }
+
+    function closeRewardModal() {
+      document.getElementById("rewardModal").style.display = "none";
+      showReturnHomeButton();
+    }
+
+    // Initialize game
+    document.addEventListener("DOMContentLoaded", () => {
+      const checkAuth = setInterval(() => {
+        if (window.jandoAuth && jandoAuth.isAuthenticated()) {
+          const user = jandoAuth.getCurrentUser();
+          
+          // Check if user has access to this year level (Year 6 game)
+          const gameYearLevel = "6"; // This is a Year 6 game
+          const userYear = user.yearLevel || user.year || user.Year || user['Year Level'] || user.grade || user.Grade;
+          
+          if (userYear) {
+            const userYearNumber = userYear.toString().replace(/[^0-9]/g, '');
+            console.log(`User Year: ${userYearNumber}, Game Year: ${gameYearLevel}`);
+            
+            if (userYearNumber !== gameYearLevel) {
+              // User doesn't have access to this year level
+              showAccessDeniedMessage(userYearNumber, gameYearLevel);
+              clearInterval(checkAuth);
+              return;
+            }
+          }
+          
+          // User has access - proceed normally
+          code = user.code;
+          studentName = user.name;
+          startGame();
+          clearInterval(checkAuth);
+        }
+      }, 100);
+
+      // Function to show access denied message
+      function showAccessDeniedMessage(userYear, gameYear) {
+        document.getElementById("loading").style.display = "none";
+        const instructionsArea = document.getElementById("instructionsArea");
+        if (instructionsArea) {
+          instructionsArea.innerHTML = `
+            <div style="text-align: center; padding: 3rem 2rem; background: var(--white); border-radius: 1rem; box-shadow: var(--shadow-lg); max-width: 600px; margin: 2rem auto;">
+              <div style="font-size: 4rem; margin-bottom: 1rem;">🚫</div>
+              <h2 style="color: var(--accent-red); margin-bottom: 1rem;">Access Restricted</h2>
+              <p style="color: var(--gray-700); line-height: 1.6; margin-bottom: 1.5rem;">
+                This is a Year ${gameYear} game, but you're registered as a Year ${userYear} student.
+              </p>
+              <p style="color: var(--gray-600); margin-bottom: 2rem;">
+                You can only access games designed for your year level.
+              </p>
+              <a href="games.html" style="
+                display: inline-block;
+                background: var(--orange);
+                color: var(--white);
+                text-decoration: none;
+                padding: 1rem 2rem;
+                border-radius: 0.5rem;
+                font-weight: 600;
+                transition: all 0.3s ease;
+              ">← Back to Your Games</a>
+            </div>
+          `;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

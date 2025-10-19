@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Access - Jando EDU</title>
+  <link rel="stylesheet" href="shared-styles.css">
+  <style>
+    .access-container {
+      max-width: 500px;
+      margin: 4rem auto;
+      background: var(--white);
+      padding: 3rem;
+      border-radius: 1rem;
+      box-shadow: var(--shadow-xl);
+      text-align: center;
+    }
+
+    .access-container h1 {
+      color: var(--dark-blue);
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+    }
+
+    .access-container p {
+      color: var(--gray-600);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .teacher-code-input {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid var(--gray-300);
+      border-radius: 0.5rem;
+      font-size: 1.1rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      background: var(--gray-50);
+    }
+
+    .teacher-code-input:focus {
+      border-color: var(--orange);
+      outline: none;
+      background: var(--white);
+    }
+
+    .access-btn {
+      background: var(--orange);
+      color: var(--white);
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 0.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .access-btn:hover {
+      background: var(--secondary-orange-dark);
+      transform: translateY(-2px);
+    }
+
+    .access-btn:disabled {
+      background: var(--gray-400);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-message {
+      color: var(--accent-red);
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-top: 1rem;
+      display: none;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 2rem;
+      color: var(--gray-600);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .back-link:hover {
+      color: var(--dark-blue);
+      text-decoration: underline;
+    }
+
+    .security-note {
+      background: #f0f9ff;
+      border: 1px solid #0ea5e9;
+      color: #0c4a6e;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="access-container">
+    <h1>🏫 Teacher Access</h1>
+    <p>Enter the teacher access code to view the dashboard and student analytics.</p>
+    
+    <form id="teacherAccessForm" onsubmit="return checkTeacherAccess(event)">
+      <input 
+        type="password" 
+        id="teacherCode" 
+        class="teacher-code-input" 
+        placeholder="Enter teacher access code"
+        maxlength="20"
+        required
+      >
+      <button type="submit" class="access-btn" id="accessBtn">
+        🔓 Access Dashboard
+      </button>
+    </form>
+
+    <div id="errorMessage" class="error-message">
+      Invalid access code. Please contact your administrator.
+    </div>
+
+    <div class="security-note">
+      🔒 <strong>Security Notice:</strong> Access is logged and expires after 1 hour for security purposes.
+    </div>
+
+    <a href="index.html" class="back-link">← Back to Student Portal</a>
+  </div>
+
+  <script>
+    // Simple teacher access codes (in a real system, this would be server-side)
+    const TEACHER_CODES = [
+      'teacher123',
+      'jando2024',
+      'educator',
+      'admin123'
+    ];
+
+    function checkTeacherAccess(event) {
+      event.preventDefault();
+      
+      const code = document.getElementById('teacherCode').value.trim();
+      const errorDiv = document.getElementById('errorMessage');
+      const button = document.getElementById('accessBtn');
+      
+      // Show loading state
+      button.textContent = '🔍 Checking...';
+      button.disabled = true;
+      errorDiv.style.display = 'none';
+      
+      // Simulate server check with delay
+      setTimeout(() => {
+        if (TEACHER_CODES.includes(code.toLowerCase())) {
+          // Grant access
+          localStorage.setItem('teacherAccess', 'granted');
+          
+          // Store access timestamp
+          localStorage.setItem('teacherAccessTime', Date.now().toString());
+          
+          // Show success and redirect
+          button.textContent = '✅ Access Granted';
+          button.style.background = '#10b981';
+          
+          setTimeout(() => {
+            window.location.href = 'teacher.html?access=teacher';
+          }, 1000);
+        } else {
+          // Access denied
+          errorDiv.style.display = 'block';
+          button.textContent = '🔓 Access Dashboard';
+          button.disabled = false;
+          
+          // Clear the input
+          document.getElementById('teacherCode').value = '';
+        }
+      }, 1500);
+      
+      return false;
+    }
+
+    // Allow Enter key to submit
+    document.getElementById('teacherCode').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        checkTeacherAccess(e);
+      }
+    });
+
+    // Check if already has valid access
+    document.addEventListener('DOMContentLoaded', function() {
+      const hasAccess = localStorage.getItem('teacherAccess') === 'granted';
+      const accessTime = localStorage.getItem('teacherAccessTime');
+      const now = Date.now();
+      
+      // Check if access is still valid (within 1 hour)
+      if (hasAccess && accessTime && (now - parseInt(accessTime)) < 3600000) {
+        document.querySelector('.access-container').innerHTML = `
+          <h1>✅ Access Active</h1>
+          <p>You already have teacher dashboard access.</p>
+          <a href="teacher.html?access=teacher" class="access-btn" style="text-decoration: none; display: block;">
+            📊 Open Teacher Dashboard
+          </a>
+          <a href="index.html" class="back-link">← Back to Student Portal</a>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

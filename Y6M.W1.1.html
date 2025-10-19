@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Y6M.W1.1 – Place Value Game</title>
+  <link rel="stylesheet" href="shared-styles.css">
+  <style>
+    /* All common styles are now in shared-styles.css */
+    /* Game-specific layout improvements */
+    
+    #gameArea {
+      max-width: 800px;
+      margin: 0 auto; /* Remove bottom margin completely */
+      padding: 2rem;
+      background: var(--white);
+      border-radius: 1rem;
+      box-shadow: var(--shadow-lg);
+      min-height: auto;
+      height: auto;
+    }
+    
+    #question {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--dark-blue);
+      margin-bottom: 2rem;
+      text-align: center;
+      line-height: 1.4;
+    }
+    
+    #answer {
+      width: 300px;
+      padding: 1rem;
+      font-size: 1.2rem;
+      text-align: center;
+      margin: 1rem auto;
+      display: block;
+      border: 2px solid var(--gray-300);
+      border-radius: 0.5rem;
+    }
+    
+    #answer:focus {
+      border-color: var(--orange);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(225, 92, 49, 0.1);
+    }
+    
+    button {
+      margin: 1.5rem auto;
+      display: block;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+    }
+    
+    #feedback {
+      margin: 2rem 0;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 600;
+      /* Remove or comment out the min-height to allow proper expansion */
+      /* min-height: 1.5rem; */
+    }
+    
+    #progress {
+      margin-bottom: 2rem; /* Space below progress */
+      margin-top: 0; /* Remove top margin since it's now at top */
+      padding: 1rem;
+      background: var(--gray-50);
+      border-radius: 0.5rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    #result, #uploadStatus {
+      margin-top: 1rem;
+      text-align: center;
+    }
+    
+    .feedback-msg {
+  display: none;
+  margin-top: 18px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 18px;
+  color: var(--dark-blue);
+  background: #f7faff;
+  border: 3px solid transparent;
+  transition: border-color 0.2s, background 0.2s;
+}
+.feedback-msg.correct {
+  border-color: #32CD32;
+  background: #eafbe7;
+}
+.feedback-msg.incorrect {
+  border-color: #E15C31;
+  background: #ffeae7;
+}
+footer {
+  margin-top: 3rem;
+  clear: both;
+}
+.container {
+  min-height: auto;
+  height: auto;
+  padding-bottom: 1rem; /* Reduce from 3rem to 1rem */
+}
+
+#startBtn:hover {
+  background: #d14a1f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(225, 92, 49, 0.3);
+}
+
+#nextBtn {
+  margin: 1.5rem auto;
+  display: block;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+#nextBtn:enabled {
+  background: var(--orange) !important;
+  color: white !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 8px rgba(225, 92, 49, 0.3);
+}
+
+#nextBtn:enabled:hover {
+  background: #d14a1f !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(225, 92, 49, 0.4);
+}
+
+#nextBtn:disabled {
+  background: var(--gray-400);
+  color: var(--gray-600);
+  cursor: not-allowed;
+}
+  </style>
+</head>
+<body>
+  <!-- Authentication Modal -->
+  <div id="authModal">
+    <div id="authModalContent">
+      <h2>Welcome to Jando EDU!</h2>
+      <p>Please enter your unique student code to access your games and track your progress.</p>
+      <input type="text" id="studentCodeInput" placeholder="Enter your student code" maxlength="20">
+      <div id="authError" style="display: none; color: var(--accent-red); margin: 0.5rem 0; font-size: 0.875rem;"></div>
+      <button id="authLoginBtn" onclick="jandoAuth.authenticateUser()">Login</button>
+    </div>
+  </div>
+
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <img src="https://i.imgur.com/QIdMEsB.png" alt="Jando EDU Logo" class="logo">
+      </div>
+      <div class="header-right">
+        <span id="userGreeting" style="display: none;"></span>
+        <div class="menu-container">
+          <button id="menuBtn" class="menu-button">☰ Menu</button>
+          <div id="menuDropdown" class="menu-dropdown">
+            <a href="index.html" class="menu-item">Home</a>
+            <a href="learning-hub.html" class="menu-item">Learning Hub</a>
+            <a href="games.html" class="menu-item">Games</a>
+            <a href="reward.html" class="menu-item">My Rewards</a>
+            <button class="menu-logout" onclick="jandoAuth.logout()">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div id="loading" style="display: none;">
+      <img src="https://i.imgur.com/KpZ3dFx.gif" alt="Loading...">
+      <span>Loading, please wait...</span>
+    </div>
+
+    <!-- Instructions Section -->
+    <div id="instructionsArea" style="text-align: center; max-width: 600px; margin: 2rem auto;">
+      <h2 id="greeting" style="color: var(--dark-blue); margin-bottom: 1.5rem;"></h2>
+      <div style="background: var(--white); padding: 2rem; border-radius: 1rem; box-shadow: var(--shadow-lg); margin-bottom: 2rem;">
+        <h3 style="color: var(--orange); margin-bottom: 1rem;">🎯 How to Play</h3>
+        <ul style="text-align: left; color: var(--dark-blue); font-size: 1.1rem; line-height: 1.6;">
+          <li>Answer place value questions by typing the correct value</li>
+          <li>Look for the highlighted digit in each number</li>
+          <li>Calculate its place value (units, tens, hundreds, thousands)</li>
+          <li>Get 4 out of 5 correct to earn a reward! 🎁</li>
+        </ul>
+      </div>
+      <button id="startBtn" onclick="startCountdown()" style="
+        background: var(--orange);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      ">🚀 Start Game</button>
+    </div>
+
+    <div id="countdown" style="display: none;"></div>
+
+    <div id="gameArea" style="display: none;">
+      <div id="progress"></div>
+      <div id="question"></div>
+      <input type="number" id="answer" placeholder="Type your answer here">
+      <br>
+      <button id="submitBtn" onclick="submitAnswer()">Submit</button>
+      <button id="nextBtn" onclick="nextQuestion()" style="display: none; background: var(--gray-400); cursor: not-allowed;" disabled>Next</button>
+      <div id="feedback" class="feedback-msg"></div>
+    </div>
+
+    <div id="result"></div>
+    <div id="uploadStatus"></div>
+  </div>
+
+  <!-- Reward Modal Popup -->
+  <div id="rewardModal">
+    <div id="rewardModalContent">
+      <span class="closeModal" onclick="closeRewardModal()">&times;</span>
+      <h2 style="color: var(--dark-blue); margin-bottom: 10px;">🎉 Congratulations! 🎉</h2>
+      <p id="rewardMessage" style="font-size: 20px; margin-bottom: 20px;">Click the present to reveal your reward!</p>
+      <div id="rewardDisplay" onclick="revealReward()" style="cursor: pointer;">🎁</div>
+      <div style="display: none; text-align: center; margin-top: 20px;" id="rewardButtons">
+        <button class="modalButton" onclick="closeRewardModal()" id="closeRewardBtn" style="margin: 0 0.5rem;">Awesome!</button>
+        <button class="modalButton" onclick="window.location.href='games.html'" style="background: var(--orange); margin: 0 0.5rem;">🏠 Return to Games</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Modal Popup -->
+  <div id="loadingModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 1rem; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+      <img src="https://i.imgur.com/KpZ3dFx.gif" alt="Loading..." style="width: 60px; height: 60px; margin-bottom: 1rem;">
+      <h3 style="color: var(--dark-blue); margin-bottom: 0.5rem;">Uploading Results...</h3>
+      <p style="color: var(--gray-600); font-size: 0.9rem;">Please wait while we save your progress</p>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzwNZGb_nRFF9t4lLdJdbII1kuDKhsiy4_liBxOe3pNc6rWP7swfem33C_ALT3OWQ9GoQ/exec";
+    const sheetName = "Y6M.W1.1"; 
+    const gameName = "Y6M.W1.1 Place Value";
+
+    let code = "";
+    let studentName = "";
+    let currentQuestion = -1;
+    let score = 0;
+    let totalQuestions = 5;
+    let responses = [];
+    let correctValue, targetDigit, numberStr;
+
+    let answerSubmitted = false;
+
+    // 🐾 All animals
+    const animals = ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮",
+      "🐷","🐸","🐵","🐔","🐧","🐦","🐤","🦆","🦅","🦉","🐴","🦄","🐝","🐛","🦋",
+      "🐌","🐞","🐢","🐍","🦎","🦖","🦕","🐙","🦑","🦐","🦞","🦀","🐡","🐠","🐟",
+      "🐬","🐳","🐋","🦈","🐊","🐅","🐆","🦓","🦍","🦧","🐘","🦛","🦏","🐪","🐫",
+      "🦒","🦘","🐃","🐂","🐄","🐎","🐖","🐏","🐑","🐐","🦌","🐕","🐩","🐈","🐓",
+      "🦃","🕊️","🐇","🐁","🐀","🐿️","🦔"];
+
+    // Initialize game when user is authenticated
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("answer").addEventListener("keypress", e => {
+        if (e.key === "Enter") { 
+          e.preventDefault(); 
+          if (!answerSubmitted) {
+            submitAnswer();
+          } else {
+            const nextBtn = document.getElementById("nextBtn");
+            if (!nextBtn.disabled) {
+              nextQuestion();
+            }
+          }
+        }
+      });
+      
+      // Monitor answer changes to enable Next button if correct
+      document.getElementById("answer").addEventListener("input", () => {
+        if (answerSubmitted) {
+          checkAnswerForNext();
+        }
+      });
+      
+      // Wait for auth system to initialize
+      const checkAuth = setInterval(() => {
+        if (window.jandoAuth && jandoAuth.isAuthenticated()) {
+          const user = jandoAuth.getCurrentUser();
+          
+          // Check if user has access to this year level (Year 6 game)
+          const gameYearLevel = "6"; // This is a Year 6 game
+          const userYear = user.yearLevel || user.year || user.Year || user['Year Level'] || user.grade || user.Grade;
+          
+          if (userYear) {
+            const userYearNumber = userYear.toString().replace(/[^0-9]/g, '');
+            console.log(`User Year: ${userYearNumber}, Game Year: ${gameYearLevel}`);
+            
+            if (userYearNumber !== gameYearLevel) {
+              // User doesn't have access to this year level
+              showAccessDeniedMessage(userYearNumber, gameYearLevel);
+              clearInterval(checkAuth);
+              return;
+            }
+          }
+          
+          // User has access - proceed normally
+          code = user.code;
+          studentName = user.name;
+          startGame();
+          clearInterval(checkAuth);
+        }
+      }, 100);
+
+      // Function to show access denied message
+      function showAccessDeniedMessage(userYear, gameYear) {
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("instructionsArea").innerHTML = `
+          <div style="text-align: center; padding: 3rem 2rem; background: var(--white); border-radius: 1rem; box-shadow: var(--shadow-lg); max-width: 600px; margin: 2rem auto;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🚫</div>
+            <h2 style="color: var(--accent-red); margin-bottom: 1rem;">Access Restricted</h2>
+            <p style="color: var(--gray-700); line-height: 1.6; margin-bottom: 1.5rem;">
+              This is a Year ${gameYear} game, but you're registered as a Year ${userYear} student.
+            </p>
+            <p style="color: var(--gray-600); margin-bottom: 2rem;">
+              You can only access games designed for your year level.
+            </p>
+            <a href="games.html" style="
+              display: inline-block;
+              background: var(--orange);
+              color: var(--white);
+              text-decoration: none;
+              padding: 1rem 2rem;
+              border-radius: 0.5rem;
+              font-weight: 600;
+              transition: all 0.3s ease;
+            ">← Back to Your Games</a>
+          </div>
+        `;
+      }
+    });
+
+    function checkAnswerForNext() {
+      const ans = parseInt(document.getElementById("answer").value);
+      const nextBtn = document.getElementById("nextBtn");
+      
+      if (ans === correctValue) {
+        nextBtn.disabled = false;
+        nextBtn.style.background = "var(--orange)";
+        nextBtn.style.color = "white";
+        nextBtn.style.cursor = "pointer";
+        showFeedback("Correct.", "correct");
+      } else {
+        nextBtn.disabled = true;
+        nextBtn.style.background = "var(--gray-400)";
+        nextBtn.style.color = "var(--gray-600)";
+        nextBtn.style.cursor = "not-allowed";
+        if (ans && !isNaN(ans)) {
+          showFeedback(`Incorrect. The correct value was ${correctValue}.`, "incorrect");
+        }
+      }
+    }
+
+    function startGame() {
+      // Show instructions with greeting
+      document.getElementById("greeting").innerText = `Hi, ${studentName}!`;
+      document.getElementById("instructionsArea").style.display = "block";
+      
+      // Hide game elements initially
+      document.getElementById("countdown").style.display = "none";
+      document.getElementById("gameArea").style.display = "none";
+      document.getElementById("result").innerText = "";
+      document.getElementById("uploadStatus").innerText = "";
+      
+      // Reset game state
+      currentQuestion = -1; 
+      score = 0;
+      responses = [];
+    }
+
+    function startCountdown() {
+      // Hide instructions
+      document.getElementById("instructionsArea").style.display = "none";
+      
+      // Show countdown
+      let countdown = 3;
+      const countdownDiv = document.getElementById("countdown");
+      countdownDiv.style.display = "block";
+      countdownDiv.style.textAlign = "center";
+      countdownDiv.style.fontSize = "3rem";
+      countdownDiv.style.color = "var(--orange)";
+      countdownDiv.style.fontWeight = "bold";
+      countdownDiv.style.margin = "2rem 0";
+      countdownDiv.innerText = countdown;
+
+      const interval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          countdownDiv.innerText = countdown;
+        } else {
+          countdownDiv.innerText = "GO!";
+          setTimeout(() => {
+            clearInterval(interval);
+            countdownDiv.style.display = "none";
+
+            // Show game area and start with example
+            document.getElementById("gameArea").style.display = "block";
+            showExample();
+          }, 500);
+        }
+      }, 1000);
+    }
+
+    function showFeedback(message, type) {
+  const el = document.getElementById("feedback");
+  if (message) {
+    el.innerText = message;
+    el.className = "feedback-msg " + type;
+    el.style.display = "block";
+  } else {
+    el.innerText = "";
+    el.className = "feedback-msg";
+    el.style.display = "none";
+  }
+}
+
+    function showExample() {
+      answerSubmitted = false;
+      let exampleNum = "4729".split("").map((d,i) => i===1 ? `<span class="digit-highlight">${d}</span>` : d).join("");
+      document.getElementById("question").innerHTML =
+        `Example: What is the value of 7 in the number ${exampleNum}?`;
+      document.getElementById("answer").value = "";
+      showFeedback("The value of the number 7 in this number is 700.", "correct");
+      document.getElementById("progress").innerText = "Example Question";
+      
+      // Make sure submit button is visible for example
+      document.getElementById("submitBtn").style.display = "block";
+      document.getElementById("nextBtn").style.display = "none";
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+      answerSubmitted = false;
+
+      // Show submit button, hide next button
+      document.getElementById("submitBtn").style.display = "block";
+      document.getElementById("nextBtn").style.display = "none";
+
+      if (currentQuestion >= totalQuestions) {
+        endGame();
+        return;
+      }
+      
+      // Generate a 4-digit number with all unique digits
+      let digits = [];
+      while (digits.length < 4) {
+        let digit = Math.floor(Math.random() * 10);
+        // Don't allow 0 as first digit (to keep it 4-digit) and no duplicates
+        if (digits.length === 0 && digit === 0) continue;
+        if (!digits.includes(digit)) {
+          digits.push(digit);
+        }
+      }
+      
+      numberStr = digits.join("");
+      let index = Math.floor(Math.random() * numberStr.length);
+      targetDigit = parseInt(numberStr[index]);
+      let place = numberStr.length - index - 1;
+      correctValue = targetDigit * Math.pow(10, place);
+
+      let displayNum = numberStr
+        .split("")
+        .map((d,i) => i===index ? `<span class="digit-highlight">${d}</span>` : d)
+        .join("");
+
+      document.getElementById("question").innerHTML =
+        `What is the value of ${targetDigit} in the number ${displayNum}?`;
+      document.getElementById("answer").value = "";
+      document.getElementById("answer").focus(); // Focus back on input
+      showFeedback("", "");
+      document.getElementById("progress").innerText = 
+        `Question ${currentQuestion+1} of ${totalQuestions}`;
+    }
+
+    function submitAnswer() {
+      let ans = parseInt(document.getElementById("answer").value); // Remove the () after .value
+      if (currentQuestion === -1) { 
+        nextQuestion(); 
+        return; 
+      }
+
+      answerSubmitted = true;
+      responses.push({ question: `Value of ${targetDigit} in ${numberStr}`, correct: correctValue, answer: ans });
+
+      // Hide submit button and show next button
+      document.getElementById("submitBtn").style.display = "none";
+      document.getElementById("nextBtn").style.display = "block";
+
+      if (ans === correctValue) {
+        score++;
+        showFeedback("Correct.", "correct");
+        // Enable next button immediately
+        const nextBtn = document.getElementById("nextBtn");
+        nextBtn.disabled = false;
+        nextBtn.style.background = "var(--orange)";
+        nextBtn.style.color = "white";
+        nextBtn.style.cursor = "pointer";
+      } else {
+        showFeedback(`Incorrect. The correct value was ${correctValue}. Try editing your answer!`, "incorrect");
+        // Keep next button disabled until correct answer
+        const nextBtn = document.getElementById("nextBtn");
+        nextBtn.disabled = true;
+        nextBtn.style.background = "var(--gray-400)";
+        nextBtn.style.color = "var(--gray-600)";
+        nextBtn.style.cursor = "not-allowed";
+      }
+    }
+
+    function endGame() {
+      document.getElementById("gameArea").style.display = "none";
+      document.getElementById("result").innerText = `Game Over. You scored ${score} out of ${totalQuestions}.`;
+
+      // Show loading popup immediately
+      document.getElementById("loadingModal").style.display = "block";
+
+      const payload = { code: code, score: score, game: gameName, sheet: sheetName, responses: responses };
+
+      fetch(scriptURL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(() => {
+        // Hide loading popup
+        document.getElementById("loadingModal").style.display = "none";
+        
+        // Show success message briefly
+        document.getElementById("uploadStatus").style.color = "green";
+        document.getElementById("uploadStatus").innerText = "Results submitted successfully.";
+        
+        // Check for reward after a short delay
+        setTimeout(() => {
+          if (score / totalQuestions >= 0.8) { 
+            giveReward(); 
+          } else {
+            // If no reward, show return home button
+            showReturnHomeButton();
+          }
+        }, 500);
+      })
+      .catch(() => {
+        // Hide loading popup even on error
+        document.getElementById("loadingModal").style.display = "none";
+        
+        document.getElementById("uploadStatus").style.color = "red";
+        document.getElementById("uploadStatus").innerText = "Could not submit results.";
+        
+        // Show return home button even on error
+        showReturnHomeButton();
+      });
+    }
+
+    function showReturnHomeButton() {
+      // Only add return button if it doesn't already exist
+      if (document.querySelector('.return-home-btn')) return;
+      
+      const returnBtn = document.createElement('button');
+      returnBtn.className = 'return-home-btn';
+      returnBtn.innerHTML = '🏠 Return to Games';
+      returnBtn.style.cssText = `
+        margin: 2rem auto;
+        padding: 1rem 2rem;
+        display: block;
+        background: var(--orange);
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      `;
+      returnBtn.onmouseover = () => returnBtn.style.transform = 'translateY(-2px)';
+      returnBtn.onmouseout = () => returnBtn.style.transform = 'translateY(0)';
+      returnBtn.onclick = () => window.location.href = 'games.html';
+      
+      document.getElementById("result").appendChild(returnBtn);
+    }
+
+    let currentReward = ""; // Store the current reward
+
+    function giveReward() {
+  fetch(scriptURL + "?rewards=" + encodeURIComponent(code))
+    .then(res => res.json())
+    .then(data => {
+      let currentRewards = Array.isArray(data.rewards) ? data.rewards : (data.rewards ? data.rewards.split("") : []);
+      let available = animals.filter(a => !currentRewards.includes(a));
+      if (available.length === 0) {
+        document.getElementById("uploadStatus").innerText = "You've collected all the animals! 🎉";
+        showReturnHomeButton();
+        return;
+      }
+      currentReward = available[Math.floor(Math.random() * available.length)];
+      
+      // Show the modal popup
+      document.getElementById("rewardModal").style.display = "block";
+      document.getElementById("rewardDisplay").innerText = "🎁";
+      document.getElementById("rewardMessage").innerText = "Click the present to reveal your reward!";
+      document.getElementById("rewardButtons").style.display = "none";
+      
+      // Save reward to sheet
+      fetch(scriptURL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify({ code: code, reward: currentReward }),
+        headers: { "Content-Type": "application/json" }
+      });
+    })
+    .catch(err => {
+      console.error("Reward error:", err);
+      document.getElementById("uploadStatus").innerText = "⚠️ Could not fetch rewards.";
+      showReturnHomeButton();
+    });
+}
+    
+    function revealReward() {
+      document.getElementById("rewardDisplay").innerText = currentReward;
+      document.getElementById("rewardDisplay").style.animation = "wiggle 1s infinite";
+      document.getElementById("rewardMessage").innerText = "🎉 You earned a new animal friend! 🎉";
+      document.getElementById("rewardButtons").style.display = "block";
+      
+      // Remove click ability after reveal
+      document.getElementById("rewardDisplay").onclick = null;
+      document.getElementById("rewardDisplay").style.cursor = "default";
+      
+      // Confetti animation
+      for (let i = 0; i < 50; i++) {
+        let confetti = document.createElement("div");
+        confetti.className = "confetti";
+        confetti.style.left = Math.random() * 100 + "vw";
+        confetti.style.backgroundColor = ["#E15C31","#A6BFFF","#22277A","#FFD700","#32CD32"][Math.floor(Math.random()*5)];
+        confetti.style.animationDuration = (2 + Math.random() * 3) + "s";
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 3000);
+      }
+    }
+    
+    function closeRewardModal() {
+      document.getElementById("rewardModal").style.display = "none";
+      // Reset for next time
+      document.getElementById("rewardDisplay").onclick = revealReward;
+      document.getElementById("rewardDisplay").style.cursor = "pointer";
+      document.getElementById("rewardDisplay").style.animation = "";
+    }
+    
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+      let modal = document.getElementById("rewardModal");
+      if (event.target === modal) {
+        closeRewardModal();
+      }
+    }
+
+  </script>
+
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2025 Jando EDU. All rights reserved. | <a href="https://www.jandotutoring.com/privacy-policy" target="_blank">Privacy Policy</a> | <a href="https://www.jandotutoring.com/contact-us" target="_blank">Contact</a></p>
+    </div>
+  </footer>
+</body>
+</html>

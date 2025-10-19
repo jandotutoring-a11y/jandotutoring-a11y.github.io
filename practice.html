@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Practice & Demo</title>
+  <link rel="stylesheet" href="shared-styles.css">
+  <style>
+    /* Practice-specific styles that extend or override shared styles */
+    
+    section {
+      margin: 40px 0 0 0;
+      margin-bottom: 24px;
+    }
+    
+    h2 { 
+      color: var(--dark-blue); 
+      margin-bottom: 12px; 
+    }
+    
+    .instructions {
+      background: #eaf1ff;
+      border-radius: 8px;
+      padding: 12px 18px;
+      margin-bottom: 18px;
+      color: var(--dark-blue);
+      font-size: 18px;
+      text-align: left;
+      display: inline-block;
+      max-width: 90%;
+    }
+    /* Practice page extends shared styles */
+    input, button {
+      margin-top: 12px;
+    }
+    input {
+      width: 220px;
+      text-align: center;
+    }
+    .demo-area {
+      margin: 18px 0;
+      padding: 18px;
+      background: #f7faff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      min-height: 60px;
+    }
+    .bubble {
+      position: relative;
+      display: inline-block;
+      width: 70px;
+      height: 70px;
+      line-height: 70px;
+      border-radius: 50%;
+      background: var(--light-blue);
+      border: 2px solid var(--dark-blue);
+      cursor: pointer;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      color: var(--dark-blue);
+      margin: 0 10px;
+      transition: background 0.2s;
+    }
+    .bubble.correct { background: #32CD32; color: #fff; }
+    .bubble.incorrect { background: #E15C31; color: #fff; }
+    .option-btn {
+      margin: 0 8px;
+      padding: 10px 24px;
+      border-radius: 8px;
+      background: #fff;
+      color: #222;
+      border: 2px solid var(--dark-blue);
+      font-size: 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .option-btn.selected { background: #A6BFFF; color: #fff; }
+    .drag-item {
+      display: inline-block;
+      padding: 10px 18px;
+      margin: 0 12px;
+      background: #A6BFFF;
+      color: #fff;
+      border-radius: 8px;
+      cursor: grab;
+      font-size: 20px;
+      border: 2px solid var(--dark-blue);
+    }
+    .drop-zone {
+      display: inline-block;
+      min-width: 120px;
+      min-height: 40px;
+      background: #eaf1ff;
+      border: 2px dashed var(--dark-blue);
+      border-radius: 8px;
+      vertical-align: middle;
+      margin: 0 12px;
+      font-size: 20px;
+      line-height: 40px;
+    }
+    #practiceResult { font-weight: bold; margin-top: 12px; color: var(--orange); }
+
+    /* Add this CSS for the Next/Continue button */
+    .next-btn {
+      margin-top: 18px;
+      padding: 12px 32px;
+      font-size: 20px;
+      border-radius: 8px;
+      background: #eee;
+      color: #aaa;
+      border: none;
+      cursor: not-allowed;
+      transition: background 0.2s, color 0.2s;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .next-btn.active {
+      background: var(--orange);
+      color: #fff;
+      cursor: pointer;
+    }
+    .welcome-name {
+      color: var(--dark-blue);
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    .feedback-msg {
+      display: none;
+      margin-top: 18px;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 18px;
+      color: var(--dark-blue);
+      background: #f7faff;
+      border: 3px solid transparent;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .feedback-msg.correct {
+      border-color: #32CD32;
+      background: #eafbe7;
+    }
+    .feedback-msg.incorrect {
+      border-color: #E15C31;
+      background: #ffeae7;
+    }
+    #bubbleDemoArea {
+      margin-top: 18px;
+    }
+    
+    /* Essential practice-specific styles kept for unique functionality */
+    .demo-area {
+      margin: 18px 0;
+      padding: 18px;
+      background: #f7faff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      min-height: 60px;
+    }
+    
+    /* Static bubble styles for practice (no animation) */
+    .bubble {
+      animation: none !important; /* Override floating animation */
+      position: relative;
+      display: inline-block;
+      margin: 0 10px;
+    }
+    
+    /* Practice-specific option buttons */
+    .option-btn {
+      margin: 0 8px;
+      padding: 10px 24px;
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--dark-blue);
+      border: 2px solid var(--dark-blue);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: var(--font-weight-medium);
+    }
+    
+    .option-btn:hover {
+      background: var(--light-blue);
+      color: var(--dark-blue);
+    }
+    
+    .option-btn.selected {
+      background: var(--orange);
+      color: var(--white);
+      border-color: var(--orange);
+    }
+    
+    /* Next button for practice progression */
+    .next-btn {
+      margin-top: 18px;
+      padding: 12px 32px;
+      font-size: 20px;
+      border-radius: 8px;
+      background: var(--light-blue);
+      color: var(--dark-blue);
+      border: 2px solid var(--dark-blue);
+      cursor: not-allowed;
+      transition: all 0.2s ease;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .next-btn.enabled {
+      background: var(--orange);
+      color: var(--white);
+      cursor: pointer;
+    }
+
+    .next-btn.enabled:hover {
+      background: #c94b24;
+    }
+  </style>
+</head>
+<body>
+  <!-- Authentication Modal -->
+  <div id="authModal">
+    <div id="authModalContent">
+      <h2>Welcome to Jando EDU!</h2>
+      <p>Please enter your unique student code to access your games and track your progress.</p>
+      <input type="text" id="studentCodeInput" placeholder="Enter your student code" maxlength="20">
+      <div id="authError" style="display: none; color: var(--accent-red); margin: 0.5rem 0; font-size: 0.875rem;"></div>
+      <button id="authLoginBtn" onclick="jandoAuth.authenticateUser()">Login</button>
+    </div>
+  </div>
+
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <img src="https://i.imgur.com/QIdMEsB.png" alt="Jando EDU Logo" class="logo">
+      </div>
+      <div class="header-right">
+        <span id="userGreeting" style="display: none;"></span>
+        <div class="menu-container">
+          <button id="menuBtn" class="menu-button">☰ Menu</button>
+          <div id="menuDropdown" class="menu-dropdown">
+            <a href="index.html" class="menu-item">Home</a>
+            <a href="games.html" class="menu-item">Games</a>
+            <a href="practice.html" class="menu-item">Practice & Demo</a>
+            <a href="reward.html" class="menu-item">My Rewards</a>
+            <button class="menu-logout" onclick="jandoAuth.logout()">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div class="container">
+    <div class="practice-section" id="section1">
+      <section>
+        <h2>Step 1: Enter Your Student Code</h2>
+        <div class="instructions">
+          <ul>
+            <li>Your unique student code is required for every game and quiz.</li>
+            <li>This code helps save your progress and rewards.</li>
+            <li>If you don’t know your code, check your email or contact admin@jandotutoring.com.</li>
+          </ul>
+        </div>
+        <input type="text" id="studentCode" placeholder="Enter your code">
+        <br>
+        <button onclick="savePracticeCode()">Save Code</button>
+        <div id="practiceResult"></div>
+      </section>
+      <button class="next-btn" id="nextBtn1" onclick="showSection(2)" disabled>Next</button>
+    </div>
+
+    <div class="practice-section" id="section2" style="display:none;">
+      <section>
+        <h2>Text Input Demo</h2>
+        <div class="instructions">
+          Type your answer in the box and press Enter or click Submit.
+        </div>
+        <div class="demo-area">
+          <span>What is the capital of Australia?</span><br>
+          <input type="text" id="textInputDemo" placeholder="Type your answer">
+          <button onclick="checkTextInput()">Submit</button>
+          <div id="textInputResult" class="feedback-msg"></div>
+        </div>
+      </section>
+      <button class="next-btn" id="nextBtn2" onclick="showSection(3)" disabled>Next</button>
+    </div>
+
+    <div class="practice-section" id="section3" style="display:none;">
+      <section>
+        <h2>Number Input Demo</h2>
+        <div class="instructions">
+          Enter a number answer and press Enter or click Submit.
+        </div>
+        <div class="demo-area">
+          <span>What is 7 × 6?</span><br>
+          <input type="number" id="numberInputDemo" placeholder="Type your answer">
+          <button onclick="checkNumberInput()">Submit</button>
+          <div id="numberInputResult" class="feedback-msg"></div>
+        </div>
+      </section>
+      <button class="next-btn" id="nextBtn3" onclick="showSection(4)" disabled>Next</button>
+    </div>
+
+    <div class="practice-section" id="section4" style="display:none;">
+      <section>
+        <h2>Bubble Pop Demo</h2>
+        <div class="instructions">
+          Click the bubble with the correct answer!
+        </div>
+        <div class="demo-area" id="bubbleDemoArea">
+          <span>Which is a multiple of 5?</span><br>
+          <div class="bubble" onclick="bubbleDemo(this,10)">10</div>
+          <div class="bubble" onclick="bubbleDemo(this,7)">7</div>
+          <div class="bubble" onclick="bubbleDemo(this,13)">13</div>
+        </div>
+        <div id="bubbleDemoResult" class="feedback-msg"></div>
+      </section>
+      <button class="next-btn" id="nextBtn4" onclick="showSection(5)" disabled>Next</button>
+    </div>
+
+    <div class="practice-section" id="section5" style="display:none;">
+      <section>
+        <h2>Multiple Choice Demo</h2>
+        <div class="instructions">
+          Click the correct option below.
+        </div>
+        <div class="demo-area" id="mcDemoArea">
+          <span>Which planet is known as the Red Planet?</span><br>
+          <button class="option-btn" onclick="mcDemo(this,'Mars')">Mars</button>
+          <button class="option-btn" onclick="mcDemo(this,'Venus')">Venus</button>
+          <button class="option-btn" onclick="mcDemo(this,'Jupiter')">Jupiter</button>
+        </div>
+        <div id="mcDemoResult" class="feedback-msg"></div>
+      </section>
+      <button class="next-btn" id="nextBtn5" onclick="showSection(6)" disabled>Next</button>
+    </div>
+
+    <div class="practice-section" id="section6" style="display:none;">
+      <section>
+        <h2>Drag and Drop Demo</h2>
+        <div class="instructions">
+          Drag the word to the correct box.
+        </div>
+        <div class="demo-area">
+          <span>Drag <span class="drag-item" draggable="true" id="dragWord">cat</span> to the animal box:</span>
+          <div class="drop-zone" id="dropZone">Drop here</div>
+          <div id="dragDropResult" class="feedback-msg"></div>
+        </div>
+      </section>
+      <button class="next-btn" id="nextBtn6" onclick="showSection(7)" disabled>Continue</button>
+    </div>
+
+    <div class="practice-section" id="section7" style="display:none;">
+      <section>
+        <h2>Image Choice Demo</h2>
+        <div class="instructions">
+          Click the image that shows one half.
+        </div>
+        <div class="demo-area" id="imageChoiceArea">
+          <button class="option-btn img-btn" onclick="imageChoiceDemo(this, 'quarter')">
+            <img src="https://i.imgur.com/kdmmEXe.png" alt="One quarter" style="width:70px;height:70px;">
+          </button>
+          <button class="option-btn img-btn" onclick="imageChoiceDemo(this, 'half')">
+            <img src="https://i.imgur.com/sKWjfYO.png" alt="One half" style="width:70px;height:70px;">
+          </button>
+          <button class="option-btn img-btn" onclick="imageChoiceDemo(this, 'full')">
+            <img src="https://i.imgur.com/yzAKlwt.png" alt="One full" style="width:70px;height:70px;">
+          </button>
+        </div>
+        <div id="imageChoiceResult" class="feedback-msg"></div>
+      </section>
+      <button class="next-btn" id="nextBtn7" onclick="showSection(8)" disabled>Next</button>
+    </div>
+
+    <div class="practice-section" id="section8" style="display:none;">
+      <section>
+        <h2>Other Game Types Coming Soon!</h2>
+        <div class="instructions">
+          More practice games will be added here. If you have ideas, let us know know!
+        </div>
+      </section>
+    </div>
+  </div>
+  <script>
+  const scriptURL = "https://script.google.com/macros/s/AKfycbzwNZGb_nRFF9t4lLdJdbII1kuDKhsiy4_liBxOe3pNc6rWP7swfem33C_ALT3OWQ9GoQ/exec";
+
+  function savePracticeCode() {
+    let code = document.getElementById("studentCode").value.trim();
+    if (!code) {
+      document.getElementById("practiceResult").innerText = "Please enter your code.";
+      return;
+    }
+    // Show loading message
+    document.getElementById("practiceResult").innerText = "Checking code...";
+    fetch(scriptURL + "?code=" + encodeURIComponent(code))
+      .then(res => res.text())
+      .then(txt => {
+        if (txt !== "Invalid") {
+          localStorage.setItem("practiceStudentCode", code);
+          document.getElementById("practiceResult").innerHTML = `<span class="welcome-name">Welcome, ${txt}!</span>`;
+          enableNextBtn(1);
+        } else {
+          document.getElementById("practiceResult").innerText = "Incorrect code.";
+        }
+      })
+      .catch(() => {
+        document.getElementById("practiceResult").innerText = "Error contacting server.";
+      });
+  }
+
+    // Show only the current section
+    function showSection(n) {
+      for (let i = 1; i <= 8; i++) {
+        document.getElementById('section'+i).style.display = (i === n) ? '' : 'none';
+      }
+    }
+
+    // Enable Next button when activity is complete
+    function enableNextBtn(n) {
+      let btn = document.getElementById('nextBtn'+n);
+      btn.disabled = false;
+      btn.classList.add('active');
+    }
+
+    // Helper to show feedback with styling
+    function showFeedback(id, message, type) {
+      const el = document.getElementById(id);
+      if (message) {
+        el.innerText = message;
+        el.className = "feedback-msg " + type;
+        el.style.display = "block";
+      } else {
+        el.innerText = "";
+        el.className = "feedback-msg";
+        el.style.display = "none";
+      }
+    }
+
+    // Text input demo
+    function checkTextInput() {
+      let ans = document.getElementById("textInputDemo").value.trim().toLowerCase();
+      if (ans === "canberra") {
+        showFeedback("textInputResult", "Correct!", "correct");
+        enableNextBtn(2);
+      } else if (ans) {
+        showFeedback("textInputResult", "Incorrect. The capital is Canberra.", "incorrect");
+      } else {
+        showFeedback("textInputResult", "", "");
+      }
+    }
+
+    // Number input demo
+    function checkNumberInput() {
+      let ans = parseInt(document.getElementById("numberInputDemo").value);
+      if (ans === 42) {
+        showFeedback("numberInputResult", "Correct!", "correct");
+        enableNextBtn(3);
+      } else if (!isNaN(ans)) {
+        showFeedback("numberInputResult", "Incorrect. The answer is 42.", "incorrect");
+      } else {
+        showFeedback("numberInputResult", "", "");
+      }
+    }
+
+    // Bubble pop demo
+    function bubbleDemo(el, val) {
+      document.querySelectorAll("#bubbleDemoArea .bubble").forEach(b => {
+        b.classList.remove("correct","incorrect");
+      });
+      if (val === 10) {
+        el.classList.add("correct");
+        showFeedback("bubbleDemoResult", "Correct!", "correct");
+        enableNextBtn(4);
+      } else {
+        el.classList.add("incorrect");
+        showFeedback("bubbleDemoResult", "Try again!", "incorrect");
+      }
+    }
+
+    // Multiple choice demo
+    function mcDemo(el, val) {
+      document.querySelectorAll("#mcDemoArea .option-btn").forEach(b => {
+        b.classList.remove("selected");
+      });
+      el.classList.add("selected");
+      if (val === "Mars") {
+        showFeedback("mcDemoResult", "Correct!", "correct");
+        enableNextBtn(5);
+      } else {
+        showFeedback("mcDemoResult", "Incorrect. The answer is Mars.", "incorrect");
+      }
+    }
+
+    // Drag and drop demo
+    let dragItem = document.getElementById("dragWord");
+    let dropZone = document.getElementById("dropZone");
+    dragItem.addEventListener("dragstart", function(e) {
+      e.dataTransfer.setData("text/plain", "cat");
+    });
+    dropZone.addEventListener("dragover", function(e) {
+      e.preventDefault();
+      dropZone.style.background = "#A6BFFF";
+    });
+    dropZone.addEventListener("dragleave", function(e) {
+      dropZone.style.background = "#eaf1ff";
+    });
+    dropZone.addEventListener("drop", function(e) {
+      e.preventDefault();
+      let data = e.dataTransfer.getData("text/plain");
+      if (data === "cat") {
+        dropZone.innerText = "🐱 Cat!";
+        showFeedback("dragDropResult", "Correct!", "correct");
+        enableNextBtn(6);
+      } else {
+        dropZone.innerText = "Try again";
+        showFeedback("dragDropResult", "Incorrect.", "incorrect");
+      }
+      dropZone.style.background = "#eaf1ff";
+    });
+
+    // Image choice demo
+    function imageChoiceDemo(el, val) {
+      document.querySelectorAll("#imageChoiceArea .img-btn").forEach(b => {
+        b.classList.remove("selected");
+      });
+      el.classList.add("selected");
+      if (val === "half") {
+        showFeedback("imageChoiceResult", "Correct!", "correct");
+        enableNextBtn(7);
+      } else {
+        showFeedback("imageChoiceResult", "Incorrect. The answer is one half.", "incorrect");
+      }
+    }
+
+    // Allow Enter key for text/number input
+    document.getElementById("textInputDemo").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") { e.preventDefault(); checkTextInput(); }
+    });
+    document.getElementById("numberInputDemo").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") { e.preventDefault(); checkNumberInput(); }
+    });
+
+    // Section navigation
+    function showSection(sectionId) {
+      document.querySelectorAll(".practice-section").forEach(s => {
+        s.style.display = "none";
+      });
+      document.getElementById("section" + sectionId).style.display = "block";
+    }
+
+    // Next button example function
+    function goToNextStep() {
+      // Here you would add the logic to go to the next game or step
+      alert("Next game or step would be loaded here.");
+    }
+
+    // Initialize by showing the first section
+    showSection(1);
+  </script>
+
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2025 Jando EDU. All rights reserved. | <a href="https://www.jandotutoring.com/privacy-policy" target="_blank">Privacy Policy</a> | <a href="https://www.jandotutoring.com/contact-us" target="_blank">Contact</a></p>
+    </div>
+  </footer>
+
+  <script src="auth.js"></script>
+</body>
+</html>

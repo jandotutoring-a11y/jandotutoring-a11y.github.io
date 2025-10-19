@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jando EDU - Game Selection</title>
+  <link rel="stylesheet" href="shared-styles.css">
+  <style>
+    /* Games page specific styles */
+    .games-hero {
+      background: linear-gradient(135deg, var(--orange) 0%, var(--dark-blue) 100%);
+      color: var(--white);
+      padding: 3rem 0;
+      text-align: center;
+      margin: 0 0 2rem 0;
+      width: 100%;
+    }
+
+    .games-hero h1 {
+      font-size: 2.5rem;
+      margin: 0 0 1rem 0;
+      font-weight: var(--font-weight-bold);
+    }
+
+    /* Game cards styling */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.game-card {
+  background: var(--white);
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 3px solid transparent;
+}
+
+.game-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  border-color: var(--orange);
+}
+
+.game-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.game-card h3 {
+  color: var(--dark-blue);
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.game-card p {
+  color: var(--gray-600);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.game-meta {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.year-badge, .subject-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.year-badge {
+  background: var(--light-blue);
+  color: var(--dark-blue);
+}
+
+.subject-badge.math {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.play-button {
+  display: inline-block;
+  background: var(--orange);
+  color: white;
+  text-decoration: none;
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.play-button:hover {
+  background: #d14a1f;
+  transform: translateY(-2px);
+}
+
+    .game-content {
+      padding: 1.5rem;
+    }
+
+    .game-description {
+      color: var(--gray-700);
+      line-height: 1.6;
+      margin: 0 0 1rem 0;
+    }
+
+    .game-features {
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0;
+    }
+
+    .game-features li {
+      padding: 0.25rem 0;
+      color: var(--gray-600);
+      font-size: 0.875rem;
+    }
+
+    .game-features li::before {
+      content: '✓';
+      color: var(--accent-green);
+      font-weight: bold;
+      margin-right: 0.5rem;
+    }
+
+    .game-stats {
+      display: flex;
+      justify-content: space-between;
+      background: var(--gray-50);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 1.25rem;
+      font-weight: var(--font-weight-bold);
+      color: var(--orange);
+      margin: 0;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--gray-600);
+      margin: 0;
+    }
+
+    .game-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .play-button {
+      flex: 1;
+      background: var(--orange);
+      color: var(--white);
+      border: none;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-weight: var(--font-weight-bold);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .play-button:hover {
+      background: var(--secondary-orange-dark);
+      transform: translateY(-1px);
+    }
+
+
+
+    .difficulty-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: var(--font-weight-medium);
+      margin: 0.5rem 0;
+    }
+
+    .difficulty-beginner {
+      background: var(--accent-green);
+      color: var(--white);
+    }
+
+    .difficulty-intermediate {
+      background: var(--orange);
+      color: var(--white);
+    }
+
+    .difficulty-advanced {
+      background: var(--accent-red);
+      color: var(--white);
+    }
+
+    .coming-soon {
+      opacity: 0.6;
+      position: relative;
+    }
+
+    .coming-soon::after {
+      content: 'Coming Soon';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: bold;
+      font-size: 0.875rem;
+    }
+
+    /* Filter section styles */
+    .filter-section {
+      background: var(--white);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 2rem;
+    }
+
+    .filter-section h3 {
+      color: var(--dark-blue);
+      margin-bottom: 1rem;
+    }
+
+    .filter-section label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: var(--font-weight-medium);
+    }
+
+    .filter-section select,
+    .filter-section input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+
+    .filter-section input {
+      background: var(--gray-50);
+    }
+
+    .filter-section select, .filter-section input {
+  font-family: var(--font-family);
+  font-size: 1rem;
+}
+
+.filter-section label {
+  color: var(--dark-blue);
+  font-weight: 600;
+}
+
+.filter-section input[type="text"] {
+  background: white !important;
+  color: var(--dark-blue) !important;
+  border: 2px solid var(--gray-300) !important;
+  padding: 0.5rem !important;
+  border-radius: 0.5rem !important;
+  font-family: var(--font-family) !important;
+  font-size: 1rem !important;
+}
+
+.filter-section input[type="text"]:focus {
+  border-color: var(--orange) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(225, 92, 49, 0.1) !important;
+}
+
+.filter-section input[type="text"]::placeholder {
+  color: var(--gray-500) !important;
+}
+
+/* Force search input styling */
+#searchFilter {
+  background: white !important;
+  color: #22277A !important;
+  border: 2px solid #d1d5db !important;
+  padding: 0.5rem !important;
+  border-radius: 0.5rem !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 1rem !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#searchFilter:focus {
+  border-color: #E15C31 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(225, 92, 49, 0.1) !important;
+}
+
+#searchFilter::placeholder {
+  color: #6b7280 !important;
+  opacity: 1 !important;
+}
+
+/* Also fix the selects if they have issues */
+#yearFilter, #subjectFilter {
+  background: white !important;
+  color: #22277A !important;
+  border: 2px solid #d1d5db !important;
+  padding: 0.5rem !important;
+  border-radius: 0.5rem !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 1rem !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#yearFilter:focus, #subjectFilter:focus {
+  border-color: #E15C31 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(225, 92, 49, 0.1) !important;
+}
+  </style>
+</head>
+<body>
+  <!-- Authentication Modal -->
+  <div id="authModal">
+    <div id="authModalContent">
+      <h2>Welcome to Jando EDU!</h2>
+      <p>Please enter your unique student code to access your games and track your progress.</p>
+      <input type="text" id="studentCodeInput" placeholder="Enter your student code" maxlength="20">
+      <div id="authError" style="display: none; color: var(--accent-red); margin: 0.5rem 0; font-size: 0.875rem;"></div>
+      <button id="authLoginBtn" onclick="jandoAuth.authenticateUser()">Login</button>
+    </div>
+  </div>
+
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <img src="https://i.imgur.com/QIdMEsB.png" alt="Jando EDU Logo" class="logo">
+      </div>
+      <div class="header-right">
+        <span id="userGreeting" style="display: none;"></span>
+        <div class="menu-container">
+          <button id="menuBtn" class="menu-button">☰ Menu</button>
+          <div id="menuDropdown" class="menu-dropdown">
+            <a href="index.html" class="menu-item">Home</a>
+            <a href="learning-hub.html" class="menu-item">Learning Hub</a>
+            <a href="games.html" class="menu-item">Games</a>
+            <a href="reward.html" class="menu-item">My Rewards</a>
+            <button class="menu-logout" onclick="jandoAuth.logout()">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="games-hero">
+    <h1 id="gamesTitle">Choose Your Game!</h1>
+    <p id="gamesSubtitle">Select from our collection of educational math games</p>
+  </div>
+
+  <div class="container" style="padding: 2rem; max-width: 1400px;">
+    <!-- Filter Section -->
+    <div class="filter-section" style="background: var(--white); padding: 2rem; border-radius: 1rem; box-shadow: var(--shadow-lg); margin: 2rem auto; max-width: 1200px;">
+      <h3 style="color: var(--dark-blue); margin-bottom: 1rem;">🔍 Find Your Games</h3>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Year Level:</label>
+          <select id="yearFilter" onchange="filterGames()" style="width: 100%; padding: 0.5rem; border-radius: 0.5rem; border: 2px solid var(--gray-300);">
+            <option value="">All Years</option>
+            <option value="5">Year 5</option>
+            <option value="6">Year 6</option>
+            <option value="7">Year 7</option>
+            <option value="8">Year 8</option>
+            <option value="9">Year 9</option>
+          </select>
+        </div>
+        
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Subject:</label>
+          <select id="subjectFilter" onchange="filterGames()" style="width: 100%; padding: 0.5rem; border-radius: 0.5rem; border: 2px solid var(--gray-300);">
+            <option value="">All Subjects</option>
+            <option value="M">Mathematics</option>
+            <option value="E">English</option>
+            <option value="S">Science</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="games-grid">
+      <!-- Update your existing games -->
+      <div class="game-card" data-year="6" data-subject="M" data-name="Place Value">
+        <div class="game-icon">🔢</div>
+        <h3>Y6M.W1.1 – Place Value</h3>
+        <p>Learn about place values with thousands, hundreds, tens and units</p>
+        <div class="game-meta">
+          <span class="year-badge">Year 6</span>
+          <span class="subject-badge math">Math</span>
+        </div>
+        <a href="Y6M.W1.1.html" class="play-button">Play Now</a>
+      </div>
+
+      <div class="game-card" data-year="6" data-subject="M" data-name="Bubble Pop Math">
+        <div class="game-icon">🫧</div>
+        <h3>Y6M.W1.2 – Bubble Pop Math</h3>
+        <p>Pop bubbles to solve math problems before they float away!</p>
+        <div class="game-meta">
+          <span class="year-badge">Year 6</span>
+          <span class="subject-badge math">Math</span>
+        </div>
+        <a href="Y6M.W1.2.html" class="play-button">Play Now</a>
+      </div>
+
+      <!-- Add new game cards -->
+      <div class="game-card" data-year="6" data-subject="M" data-name="Fraction Pizza">
+        <div class="game-icon">🍕</div>
+        <h3>Y6M.W1.3 – Fraction Pizza</h3>
+        <p>Learn fractions by slicing pizzas into equal parts!</p>
+        <div class="game-meta">
+          <span class="year-badge">Year 6</span>
+          <span class="subject-badge math">Math</span>
+        </div>
+        <a href="Y6M.W1.3.html" class="play-button">Play Now</a>
+      </div>
+
+      <div class="game-card" data-year="6" data-subject="M" data-name="Times Table Race">
+        <div class="game-icon">🏎️</div>
+        <h3>Y6M.W1.4 – Times Table Race</h3>
+        <p>Race against time to solve multiplication problems!</p>
+        <div class="game-meta">
+          <span class="year-badge">Year 6</span>
+          <span class="subject-badge math">Math</span>
+        </div>
+        <a href="Y6M.W1.4.html" class="play-button">Play Now</a>
+      </div>
+
+      <!-- Year 5 Games (for testing filtering) -->
+      <div class="game-card" data-year="5" data-subject="M" data-name="Basic Addition">
+        <div class="game-icon">➕</div>
+        <h3>Y5M.W1.1 – Basic Addition</h3>
+        <p>Practice addition with numbers up to 1000!</p>
+        <div class="game-meta">
+          <span class="year-badge">Year 5</span>
+          <span class="subject-badge math">Math</span>
+        </div>
+        <a href="#" class="play-button">Play Now</a>
+      </div>
+
+      <!-- Year 7 Games (for testing filtering) -->
+      <div class="game-card" data-year="7" data-subject="M" data-name="Algebra Basics">
+        <div class="game-icon">📐</div>
+        <h3>Y7M.W1.1 – Algebra Basics</h3>
+        <p>Introduction to algebraic expressions and equations!</p>
+        <div class="game-meta">
+          <span class="year-badge">Year 7</span>
+          <span class="subject-badge math">Math</span>
+        </div>
+        <a href="#" class="play-button">Play Now</a>
+      </div>
+
+      <!-- Year 9 Games -->
+      <div class="game-card" data-year="9" data-subject="M" data-name="Algebra Fundamentals">
+        <div class="game-icon">🔢</div>
+        <h3>Y9M.W1.1 – Algebra Fundamentals</h3>
+        <p>Master expanding, factoring, and solving algebraic equations!</p>
+        <div class="game-meta">
+          <span class="year-badge">Year 9</span>
+          <span class="subject-badge math">Math</span>
+        </div>
+        <a href="Y9M.W1.1.html" class="play-button">Play Now</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2025 Jando EDU. All rights reserved. | <a href="https://www.jandotutoring.com/privacy-policy" target="_blank">Privacy Policy</a> | <a href="https://www.jandotutoring.com/contact-us" target="_blank">Contact</a></p>
+    </div>
+  </footer>
+
+  <script src="auth.js"></script>
+  <script>
+function filterGames() {
+  const yearFilter = document.getElementById("yearFilter").value;
+  const subjectFilter = document.getElementById("subjectFilter").value;
+  
+  const gameCards = document.querySelectorAll(".game-card");
+  let visibleCount = 0;
+  
+  gameCards.forEach(card => {
+    const cardYear = card.getAttribute("data-year");
+    const cardSubject = card.getAttribute("data-subject");
+    
+    let show = true;
+    
+    // Year filter
+    if (yearFilter && cardYear !== yearFilter) show = false;
+    
+    // Subject filter
+    if (subjectFilter && cardSubject !== subjectFilter) show = false;
+    
+    card.style.display = show ? "block" : "none";
+    if (show) visibleCount++;
+  });
+  
+  // Show message if no games found
+  updateNoResultsMessage(visibleCount);
+}
+
+// New function to filter games by user's year level only
+function filterGamesByYear(userYear) {
+  console.log('Filtering games by year:', userYear);
+  
+  const gameCards = document.querySelectorAll(".game-card");
+  let visibleCount = 0;
+  let totalGames = 0;
+  
+  gameCards.forEach(card => {
+    totalGames++;
+    const cardYear = card.getAttribute("data-year");
+    
+    // Show only games that match the user's year level
+    const show = cardYear === userYear.toString();
+    
+    card.style.display = show ? "block" : "none";
+    if (show) visibleCount++;
+  });
+  
+  console.log(`Showing ${visibleCount} out of ${totalGames} games for Year ${userYear}`);
+  
+  // Update page title to reflect year-specific filtering
+  const heroSection = document.querySelector('.games-hero');
+  if (heroSection) {
+    const titleElement = heroSection.querySelector('h1');
+    const subtitleElement = heroSection.querySelector('p');
+    if (titleElement && subtitleElement) {
+      titleElement.textContent = `Year ${userYear} Games`;
+      subtitleElement.textContent = `Educational games designed specifically for Year ${userYear} students`;
+    }
+  }
+  
+  // Show custom message if no games found for this year
+  if (visibleCount === 0) {
+    showNoGamesForYearMessage(userYear);
+  } else {
+    // Remove any existing no-games message
+    const existingMessage = document.getElementById("noGamesForYearMessage");
+    if (existingMessage) {
+      existingMessage.remove();
+    }
+  }
+}
+
+// Show message when no games are available for the user's year level
+function showNoGamesForYearMessage(userYear) {
+  // Remove existing message if any
+  const existingMessage = document.getElementById("noGamesForYearMessage");
+  if (existingMessage) {
+    existingMessage.remove();
+  }
+  
+  // Create new message
+  const messageDiv = document.createElement("div");
+  messageDiv.id = "noGamesForYearMessage";
+  messageDiv.style.cssText = `
+    background: var(--white);
+    border-radius: 1rem;
+    padding: 3rem 2rem;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    margin: 2rem auto;
+    max-width: 600px;
+    border: 2px solid var(--light-blue);
+  `;
+  
+  messageDiv.innerHTML = `
+    <div style="font-size: 4rem; margin-bottom: 1rem;">🚧</div>
+    <h3 style="color: var(--dark-blue); margin-bottom: 1rem;">No Games Available Yet</h3>
+    <p style="color: var(--gray-600); line-height: 1.6; margin-bottom: 1.5rem;">
+      We're still developing games for Year ${userYear}. Check back soon for exciting new educational games!
+    </p>
+    <p style="color: var(--gray-600); font-size: 0.9rem;">
+      In the meantime, try our <a href="practice.html" style="color: var(--orange); text-decoration: none;">Practice & Demo</a> section.
+    </p>
+  `;
+  
+  // Insert after the games grid
+  const gamesGrid = document.querySelector(".games-grid");
+  if (gamesGrid) {
+    gamesGrid.parentNode.insertBefore(messageDiv, gamesGrid.nextSibling);
+  }
+}
+
+function updateNoResultsMessage(visibleCount) {
+  let messageDiv = document.getElementById("noResultsMessage");
+  if (visibleCount === 0) {
+    if (!messageDiv) {
+      messageDiv = document.createElement("div");
+      messageDiv.id = "noResultsMessage";
+      messageDiv.style.cssText = "text-align: center; padding: 2rem; color: var(--gray-600); font-size: 1.2rem;";
+      messageDiv.innerHTML = "🔍 No games found. Try adjusting your filters!";
+      document.querySelector(".games-grid").appendChild(messageDiv);
+    }
+    messageDiv.style.display = "block";
+  } else if (messageDiv) {
+    messageDiv.style.display = "none";
+  }
+}
+
+// Set up year-level filtering when page loads
+document.addEventListener("DOMContentLoaded", () => {
+  // Wait for authentication
+  const checkAuth = setInterval(() => {
+    if (window.jandoAuth && jandoAuth.isAuthenticated()) {
+      const user = jandoAuth.getCurrentUser();
+      console.log('User data for games filtering:', user);
+      
+      if (user) {
+        // Extract year level from user data (could be in different fields)
+        let userYear = null;
+        
+        // Check various possible field names for year level
+        if (user.yearLevel) userYear = user.yearLevel;
+        else if (user.year) userYear = user.year;
+        else if (user.Year) userYear = user.Year;
+        else if (user['Year Level']) userYear = user['Year Level'];
+        else if (user.grade) userYear = user.grade;
+        else if (user.Grade) userYear = user.Grade;
+        
+        console.log('Detected user year level:', userYear);
+        
+        if (userYear) {
+          // Convert to string and extract just the number
+          const yearString = userYear.toString();
+          const yearNumber = yearString.replace(/[^0-9]/g, ''); // Extract just numbers
+          
+          if (yearNumber) {
+            console.log('Filtering games for Year:', yearNumber);
+            
+            // Hide year filter section since it's automatically set
+            const yearFilterSection = document.querySelector('.filter-section');
+            if (yearFilterSection) {
+              yearFilterSection.style.display = 'none';
+            }
+            
+            // Filter games to only show user's year level
+            filterGamesByYear(yearNumber);
+          }
+        } else {
+          console.log('No year level found - showing all games');
+          // If no year level found, show all games with filter visible
+        }
+      }
+      clearInterval(checkAuth);
+    }
+  }, 100);
+
+  // Also listen for auth completion event
+  window.addEventListener('jandoAuthComplete', (event) => {
+    setTimeout(() => {
+      const user = event.detail;
+      console.log('Auth complete - filtering games for user:', user);
+      
+      if (user) {
+        let userYear = user.yearLevel || user.year || user.Year || user['Year Level'] || user.grade || user.Grade;
+        if (userYear) {
+          const yearNumber = userYear.toString().replace(/[^0-9]/g, '');
+          if (yearNumber) {
+            const yearFilterSection = document.querySelector('.filter-section');
+            if (yearFilterSection) {
+              yearFilterSection.style.display = 'none';
+            }
+            filterGamesByYear(yearNumber);
+          }
+        }
+      }
+    }, 500);
+  });
+});
+  </script>
+</body>
+</html>
