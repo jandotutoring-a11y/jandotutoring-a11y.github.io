@@ -9,7 +9,10 @@
   <style>
     /* Home page specific styles */
     .welcome-section {
-      background: linear-gradient(135deg, var(--light-blue) 0%, var(--dark-blue) 100%);
+      background: linear-gradient(135deg, rgba(93, 152, 255, 0.5) 0%, rgba(34, 39, 122, 0.5) 100%), url('images/jando-edu-background.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       color: var(--white);
       padding: 3rem 0;
       text-align: center;
@@ -131,7 +134,7 @@
   <div id="authModal">
     <div id="authModalContent">
       <div class="auth-header">
-        <img src="https://i.imgur.com/QIdMEsB.png" alt="Jando EDU Logo" class="auth-logo">
+        <img src="images/jando-edu-logo.png" alt="Jando EDU Logo" class="auth-logo">
         <h2>Welcome to Jando EDU!</h2>
         <p>Your learning adventure starts here</p>
       </div>
@@ -176,7 +179,7 @@
   <header>
     <div class="header-content">
       <div class="header-left">
-        <img src="https://i.imgur.com/QIdMEsB.png" alt="Jando EDU Logo" class="logo">
+        <img src="images/jando-edu-logo.png" alt="Jando EDU Logo" class="logo">
       </div>
       <div class="header-right">
         <span id="userGreeting" style="display: none;"></span>
@@ -321,20 +324,27 @@
           const gamesPlayed = data.gamesPlayed || 0;
           const averageScore = data.averageScore || 0;
           const weekProgress = data.weekProgress || 0;
+          const totalScore = data.totalScore || 0;
           
           activityContent.innerHTML = `
-            <div style="display: flex; justify-content: space-between; margin: 1rem 0;">
-              <div style="text-align: center;">
-                <p class="stat-number">${modulesStarted}</p>
-                <p class="stat-label">Modules Completed</p>
-              </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
               <div style="text-align: center;">
                 <p class="stat-number">${gamesPlayed}</p>
                 <p class="stat-label">Games Played</p>
               </div>
               <div style="text-align: center;">
+                <p class="stat-number">${totalScore}</p>
+                <p class="stat-label">Total Points</p>
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
+              <div style="text-align: center;">
+                <p class="stat-number">${modulesStarted}</p>
+                <p class="stat-label">Modules Started</p>
+              </div>
+              <div style="text-align: center;">
                 <p class="stat-number">${averageScore > 0 ? averageScore + '%' : '--'}</p>
-                <p class="stat-label">Average Score</p>
+                <p class="stat-label">Est. Average</p>
               </div>
             </div>
             <div class="progress-bar">
@@ -432,37 +442,45 @@
     // Function to fetch real user learning data from Google Sheets
     async function fetchUserLearningData(studentCode) {
       try {
-        const response = await fetch(`https://script.google.com/macros/s/AKfycbzwNZGb_nRFF9t4lLdJdbII1kuDKhsiy4_liBxOe3pNc6rWP7swfem33C_ALT3OWQ9GoQ/exec?progress=${encodeURIComponent(studentCode)}`);
-        const data = await response.json();
+        // Get student data which includes Total Games and Total Score
+        const response = await fetch(`https://script.google.com/macros/s/AKfycbzwNZGb_nRFF9t4lLdJdbII1kuDKhsiy4_liBxOe3pNc6rWP7swfem33C_ALT3OWQ9GoQ/exec?code=${encodeURIComponent(studentCode)}`);
+        const studentData = await response.json();
         
-        // Calculate real statistics from the data
-        const modulesCompleted = data.modules ? data.modules.length : 0;
-        let gamesPlayed = 0;
-        let totalScore = 0;
-        let gameCount = 0;
+        console.log('Student data:', studentData);
         
-        // Count games from quiz results
-        if (data.quizResults && Array.isArray(data.quizResults)) {
-          gamesPlayed = data.quizResults.length;
-          data.quizResults.forEach(result => {
-            if (result.score !== undefined && result.totalQuestions !== undefined) {
-              totalScore += (result.score / result.totalQuestions) * 100;
-              gameCount++;
-            }
-          });
+        // Get values from Students sheet
+        const gamesPlayed = studentData.totalGames || 0;
+        const totalScore = studentData.totalScore || 0;
+        
+        // Try to get modules progress if available
+        let modulesCompleted = 0;
+        try {
+          const progressResponse = await fetch(`https://script.google.com/macros/s/AKfycbzwNZGb_nRFF9t4lLdJdbII1kuDKhsiy4_liBxOe3pNc6rWP7swfem33C_ALT3OWQ9GoQ/exec?progress=${encodeURIComponent(studentCode)}`);
+          const progressData = await progressResponse.json();
+          modulesCompleted = progressData.length || 0;
+        } catch (progressError) {
+          console.log('Progress data not available, using 0 for modules');
         }
         
-        // Calculate average score
-        const averageScore = gameCount > 0 ? Math.round(totalScore / gameCount) : 0;
+        // Calculate average score as percentage
+        // Assuming totalScore is cumulative points, we need to estimate average percentage
+        // This would need to be adjusted based on your actual scoring system
+        let averageScore = 0;
+        if (gamesPlayed > 0 && totalScore > 0) {
+          // Rough estimate: assuming each game is worth around 10-12 points on average
+          const estimatedMaxPoints = gamesPlayed * 11; // Rough average
+          averageScore = Math.min(100, Math.round((totalScore / estimatedMaxPoints) * 100));
+        }
         
         // Calculate week progress based on modules and games
-        const weekProgress = Math.min(100, Math.round(((modulesCompleted * 20) + (gamesPlayed * 15)) / 2));
+        const weekProgress = Math.min(100, Math.round(((modulesCompleted * 20) + (gamesPlayed * 10))));
         
         return {
           modulesCompleted,
           gamesPlayed,
           averageScore,
-          weekProgress
+          weekProgress,
+          totalScore
         };
       } catch (error) {
         console.error('Error fetching learning data:', error);

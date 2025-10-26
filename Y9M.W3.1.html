@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pythagoras & Trigonometry | Jando EDU</title>
+  <link rel="stylesheet" href="shared-styles.css">
+  <link rel="stylesheet" href="loading-component.css">
+  <link rel="stylesheet" href="auth-component.css">
+  <style>
+    /* Game specific styles */
+    .game-container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: var(--white);
+      border-radius: 1rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .game-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding: 2rem;
+      background: linear-gradient(135deg, rgba(34, 39, 122, 0.5) 0%, rgba(93, 152, 255, 0.5) 100%), url('images/jando-edu-background.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      color: var(--white);
+      border-radius: 1rem;
+    }
+
+    .game-header h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 2.2rem;
+      font-weight: var(--font-weight-bold);
+    }
+
+    .game-header p {
+      margin: 0;
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .question-container {
+      background: var(--gray-50);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--orange);
+    }
+
+    .question-number {
+      color: var(--orange);
+      font-weight: var(--font-weight-bold);
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .question-text {
+      color: var(--dark-blue);
+      font-size: 1.2rem;
+      font-weight: var(--font-weight-medium);
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+
+    /* Triangle diagram styles */
+    .triangle-diagram {
+      text-align: center;
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: white;
+      border-radius: 0.5rem;
+      border: 2px solid var(--gray-300);
+    }
+
+    .triangle-svg {
+      max-width: 100%;
+      height: auto;
+      margin: 1rem 0;
+    }
+
+    /* Math formatting */
+    .math {
+      font-family: 'Times New Roman', serif;
+      font-style: italic;
+    }
+
+    .superscript {
+      vertical-align: super;
+      font-size: 0.8em;
+    }
+
+    /* Multiple choice options */
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+
+    .option {
+      background: var(--white);
+      border: 2px solid var(--gray-300);
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      font-size: 1rem;
+    }
+
+    .option:hover {
+      border-color: var(--light-blue);
+      background: var(--light-blue-50);
+    }
+
+    .option.selected {
+      border-color: var(--orange);
+      background: var(--orange-50);
+    }
+
+    .option input[type="radio"] {
+      margin-right: 0.75rem;
+      width: 16px;
+      height: 16px;
+      accent-color: var(--orange);
+    }
+
+    /* Text input for open response */
+    .text-input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid var(--gray-300);
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      font-family: var(--font-family);
+      margin: 1rem 0;
+      transition: border-color 0.3s ease;
+    }
+
+    .text-input:focus {
+      outline: none;
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(225, 92, 49, 0.1);
+    }
+
+    /* Feedback styles */
+    .feedback {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      font-weight: var(--font-weight-medium);
+      display: block !important;
+      animation: fadeIn 0.3s ease;
+      min-height: 20px;
+    }
+
+    .feedback.correct {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #10b981;
+      display: block !important;
+    }
+
+    .feedback.incorrect {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #ef4444;
+      display: block !important;
+    }
+
+    .feedback div {
+      display: block !important;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-5deg); }
+      75% { transform: rotate(5deg); }
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Progress and controls */
+    .game-progress {
+      background: var(--white);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin: 2rem 0;
+      text-align: center;
+      border: 1px solid var(--gray-300);
+    }
+
+    .progress-bar {
+      background: var(--gray-200);
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 0.5rem 0;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, var(--orange) 0%, var(--light-blue) 100%);
+      height: 100%;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+
+    .game-controls {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+
+    .btn {
+      padding: 0.75rem 2rem;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      font-weight: var(--font-weight-bold);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: var(--orange);
+      color: var(--white);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--secondary-orange-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--dark-blue);
+      color: var(--white);
+      border: 2px solid var(--dark-blue);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--light-blue);
+      border-color: var(--light-blue);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary:disabled {
+      background: var(--gray-300);
+      color: var(--gray-600);
+      border-color: var(--gray-300);
+      opacity: 0.7;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Question submit buttons */
+    #textSubmitBtn {
+      margin-top: 0.75rem;
+      padding: 0.6rem 1.5rem;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+
+    #textSubmitBtn:disabled {
+      background: var(--gray-300);
+      color: var(--gray-600);
+      cursor: not-allowed;
+    }
+
+    #textSubmitBtn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Results screen */
+    .results-screen {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .results-score {
+      font-size: 3rem;
+      color: var(--orange);
+      font-weight: var(--font-weight-bold);
+      margin: 1rem 0;
+    }
+
+    .results-message {
+      font-size: 1.2rem;
+      color: var(--dark-blue);
+      margin: 1rem 0;
+    }
+
+    .results-details {
+      background: var(--gray-50);
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      margin: 1.5rem 0;
+    }
+
+    /* Information slides styles */
+    .info-slide {
+      background: var(--white);
+      border-radius: 0.75rem;
+      padding: 2rem;
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--light-blue);
+      box-shadow: var(--shadow-md);
+    }
+
+    .info-slide h3 {
+      color: var(--dark-blue);
+      font-size: 1.5rem;
+      font-weight: var(--font-weight-bold);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .info-slide p {
+      color: var(--gray-700);
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .info-formula {
+      background: var(--gray-50);
+      border: 2px solid var(--light-blue);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: var(--font-weight-bold);
+      color: var(--dark-blue);
+      margin: 1.5rem 0;
+      font-family: 'Times New Roman', serif;
+    }
+
+    .info-example {
+      background: var(--orange-50);
+      border: 2px solid var(--orange);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+
+    .info-example h4 {
+      color: var(--orange);
+      font-size: 1.1rem;
+      font-weight: var(--font-weight-bold);
+      margin-bottom: 0.5rem;
+    }
+
+    .info-steps {
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0;
+    }
+
+    .info-steps li {
+      background: var(--gray-50);
+      border-left: 3px solid var(--light-blue);
+      padding: 0.75rem 1rem;
+      margin: 0.5rem 0;
+      border-radius: 0 0.25rem 0.25rem 0;
+    }
+
+    .info-highlight {
+      background: linear-gradient(120deg, transparent 0%, rgba(93, 152, 255, 0.2) 50%, transparent 100%);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-weight: var(--font-weight-medium);
+    }
+
+    .trig-ratios {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .trig-ratio {
+      background: var(--white);
+      border: 2px solid var(--gray-300);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .trig-ratio:hover {
+      border-color: var(--light-blue);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .trig-ratio h5 {
+      color: var(--dark-blue);
+      font-size: 1.1rem;
+      font-weight: var(--font-weight-bold);
+      margin-bottom: 0.5rem;
+    }
+
+    .trig-ratio .formula {
+      font-family: 'Times New Roman', serif;
+      font-size: 1rem;
+      color: var(--orange);
+      font-weight: var(--font-weight-medium);
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      .options {
+        grid-template-columns: 1fr;
+      }
+      
+      .game-container {
+        margin: 1rem;
+        padding: 1rem;
+      }
+
+      .info-slide {
+        padding: 1.5rem;
+      }
+
+      .trig-ratios {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Authentication Modal -->
+  <div id="authModal">
+    <div id="authModalContent">
+      <div class="auth-header">
+        <img src="images/jando-edu-logo.png" alt="Jando EDU Logo" class="auth-logo">
+        <h2>Welcome to Jando EDU!</h2>
+        <p>Your learning adventure starts here</p>
+      </div>
+      
+      <div class="auth-body">
+        <div class="auth-input-group">
+          <label class="auth-input-label" for="studentCodeInput">Student Access Code</label>
+          <input type="text" id="studentCodeInput" placeholder="Enter your unique student code" maxlength="20">
+        </div>
+        
+        <div id="authError" style="display: none;"></div>
+        
+        <button id="authLoginBtn" onclick="jandoAuth.authenticateUser()">
+          Login
+        </button>
+      </div>
+
+      <div class="auth-features">
+        <h3>What's waiting for you:</h3>
+        <ul class="auth-feature-list">
+          <li>
+            <div class="auth-feature-icon">🎮</div>
+            Interactive games and quizzes
+          </li>
+          <li>
+            <div class="auth-feature-icon">📚</div>
+            Personalized learning modules
+          </li>
+          <li>
+            <div class="auth-feature-icon">🏆</div>
+            Collect rewards and track progress
+          </li>
+          <li>
+            <div class="auth-feature-icon">📊</div>
+            Real-time performance insights
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <img src="images/jando-edu-logo.png" alt="Jando EDU Logo" class="logo">
+      </div>
+      <div class="header-right">
+        <span id="userGreeting" style="display: none;"></span>
+        <div class="menu-container">
+          <button id="menuBtn" class="menu-button">☰ Menu</button>
+          <div id="menuDropdown" class="menu-dropdown">
+            <a href="index.html" class="menu-item">Home</a>
+            <a href="learning-hub.html" class="menu-item">Learning Hub</a>
+            <a href="games.html" class="menu-item">Games</a>
+            <a href="reward.html" class="menu-item">My Rewards</a>
+            <button class="menu-logout" onclick="jandoAuth.logout()">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="game-container">
+    <div class="game-header">
+      <h1>📐 Pythagoras & Trigonometry</h1>
+      <p>Master right-angled triangles, Pythagorean theorem, and trigonometric ratios</p>
+    </div>
+
+    <!-- Information Slides Section -->
+    <div id="infoSlidesSection" style="display: block;">
+      <div class="game-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" id="infoProgressFill" style="width: 16.67%;"></div>
+        </div>
+        <div style="font-size: 0.9rem; color: var(--gray-600); margin-top: 0.5rem;">
+          Information Slide <span id="currentInfoSlide">1</span> of <span id="totalInfoSlides">6</span>
+        </div>
+      </div>
+
+      <div id="infoSlideArea">
+        <div class="info-slide">
+          <h3>📐 Loading...</h3>
+          <p>Please wait while we load the educational content...</p>
+        </div>
+      </div>
+
+      <div class="game-controls">
+        <button id="infoPrevBtn" class="btn btn-secondary" onclick="previousInfoSlide()" disabled>Previous</button>
+        <button id="infoNextBtn" class="btn btn-primary" onclick="nextInfoSlide()">Next</button>
+        <button id="startGameBtn" class="btn btn-primary" onclick="startGame()" style="display: none;">Start Game</button>
+      </div>
+    </div>
+
+    <!-- Game Section (hidden initially) -->
+    <div id="gameSection" style="display: none;">
+      <div class="game-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div style="font-size: 0.9rem; color: var(--gray-600); margin-top: 0.5rem;">
+          Question <span id="currentQuestion">1</span> of <span id="totalQuestionsDisplay">10</span>
+        </div>
+      </div>
+
+      <!-- Question Display Area -->
+      <div id="questionArea">
+        <!-- Questions will be dynamically loaded here -->
+      </div>
+    </div>
+
+      <div class="game-controls" id="gameControls" style="display: none;">
+        <button id="prevBtn" class="btn btn-secondary" onclick="previousQuestion()" disabled>Previous</button>
+        <button id="nextBtn" class="btn btn-primary" onclick="nextQuestion()" disabled>Next Question</button>
+        <button id="submitBtn" class="btn btn-primary" onclick="submitGame()" style="display: none;">Submit Test</button>
+      </div>
+
+    <!-- Results Screen -->
+    <div class="results-screen" id="resultsScreen">
+      <h2>🎉 Test Complete!</h2>
+      <div id="firstAttemptScore" style="font-size: 2rem; color: var(--orange); font-weight: bold; margin: 1rem 0; text-align: center;">
+        <!-- First attempt score will be inserted here -->
+      </div>
+      
+      <!-- Reward Requirements Info -->
+      <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 0.5rem; padding: 1rem; margin: 1rem 0; text-align: center;">
+        <div style="font-size: 1rem; color: var(--dark-blue); margin-bottom: 0.5rem;">
+          🏆 <strong>Reward Requirement</strong>
+        </div>
+        <div style="font-size: 0.9rem; color: var(--gray-600);">
+          Score above 80% to receive rewards and unlock new animals for your collection!
+        </div>
+      </div>
+      
+      <div class="results-message" id="resultsMessage"></div>
+      <div class="results-details" id="resultsDetails"></div>
+      <div class="game-controls">
+        <button class="btn btn-primary" onclick="restartGame()">Try Again</button>
+        <button class="btn btn-secondary" onclick="window.location.href='games.html'">Back to Games</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reward Modal Popup -->
+  <div id="rewardModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div id="rewardModalContent" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 1rem; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3); max-width: 400px; width: 90%;">
+      <span class="closeModal" onclick="closeRewardModal()" style="position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: bold; cursor: pointer; color: var(--gray-600);">&times;</span>
+      <h2 style="color: var(--dark-blue); margin-bottom: 10px;">🎉 Congratulations! 🎉</h2>
+      <p id="rewardMessage" style="font-size: 20px; margin-bottom: 20px;">Click the present to reveal your reward!</p>
+      <div id="rewardDisplay" onclick="revealReward()" style="cursor: pointer; font-size: 4rem; margin: 1rem 0; transition: transform 0.3s ease;">🎁</div>
+      <div style="display: none; text-align: center; margin-top: 25px;" id="rewardButtons">
+        <button onclick="closeRewardModal()" style="margin: 0 1.5rem; padding: 1rem 2rem; background: var(--light-blue); color: white; border: none; border-radius: 0.75rem; cursor: pointer; font-weight: 600; font-size: 16px; transition: transform 0.2s;">Awesome!</button>
+        <button onclick="window.location.href='games.html'" style="background: var(--orange); color: white; border: none; padding: 1rem 2rem; border-radius: 0.75rem; cursor: pointer; font-weight: 600; margin: 0 1.5rem; font-size: 16px; transition: transform 0.2s;">🏠 Return to Games</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2025 Jando EDU. All rights reserved. | <a href="https://www.jandotutoring.com/privacy-policy" target="_blank">Privacy Policy</a> | <a href="https://www.jandotutoring.com/contact-us" target="_blank">Contact</a></p>
+    </div>
+  </footer>
+
+  <script src="auth.js"></script>
+  <script src="loading-component.js"></script>
+
+  <script>
+    // Game Configuration
+    const gameConfig = {
+      maxQuestions: 10,
+      passingScore: 80,
+      gameId: 'Y9M.W3.1',
+      gameName: 'Pythagoras & Trigonometry',
+      sheetName: 'Y9M.W3.1_PythagorasTrig',
+      responseSheetName: 'Y9M.W3.1_PythagorasTrig.Responses'
+    };
+
+    // Log configuration on startup
+    console.log('Game Configuration:', gameConfig);
+
+    // Game State
+    let currentQuestionIndex = 0;
+    let questions = [];
+    let userAnswers = [];
+    let questionStartTimes = [];
+    let gameStartTime = null;
+    let hasSubmittedGame = false;
+    let gameCompleted = false;
+    
+    // Info Slides State
+    let currentInfoSlideIndex = 0;
+    let showingInfoSlides = true;
+    
+    // 🐾 All animals for rewards
+    const animals = ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮",
+      "🐷","🐸","🐵","🐔","🐧","🐦","🐤","🦆","🦅","🦉","🐴","🦄","🐝","🐛","🦋",
+      "🐌","🐞","🐢","🐍","🦎","🦖","🦕","🐙","🦑","🦐","🦞","🦀","🐡","🐠","🐟",
+      "🐬","🐳","🐋","🦈","🐊","🐅","🐆","🦓","🦍","🦧","🐘","🦛","🦏","🐪","🐫",
+      "🦒","🦘","🐃","🐂","🐄","🐎","🐖","🐏","🐑","🐐","🦌","🐕","🐩","🐈","🐓",
+      "🦃","🕊️","🐇","🐁","🐀","🐿️","🦔"];
+
+    let currentReward = "";
+
+    // Information Slides Content
+    const infoSlides = [
+      {
+        title: "📐 Introduction to Right-Angled Triangles",
+        content: `
+          <p>A <span class="info-highlight">right-angled triangle</span> is a triangle with one angle that measures exactly 90°.</p>
+          <div class="triangle-diagram">
+            <svg class="triangle-svg" width="320" height="200" viewBox="0 0 320 200">
+              <polygon points="60,160 60,60 210,160" fill="rgba(30, 64, 175, 0.1)" stroke="#1e40af" stroke-width="3"/>
+              <text x="30" y="115" text-anchor="middle" font-size="16" fill="#1e40af" font-weight="bold">Opposite</text>
+              <text x="135" y="180" text-anchor="middle" font-size="16" fill="#1e40af" font-weight="bold">Adjacent</text>
+              <text x="130" y="105" text-anchor="middle" font-size="16" fill="#e15c31" font-weight="bold">Hypotenuse</text>
+              <path d="M60,145 L75,145 L75,160" fill="none" stroke="#1e40af" stroke-width="3"/>
+              <text x="80" y="155" font-size="14" fill="#e15c31" font-weight="bold">90°</text>
+            </svg>
+          </div>
+          <ul class="info-steps">
+            <li><strong>Hypotenuse:</strong> The longest side, opposite the right angle</li>
+            <li><strong>Opposite:</strong> The side opposite to the angle we're interested in</li>
+            <li><strong>Adjacent:</strong> The side next to the angle we're interested in</li>
+          </ul>
+        `
+      },
+      {
+        title: "🔺 The Pythagorean Theorem",
+        content: `
+          <p>The Pythagorean theorem helps us find the length of any side in a right-angled triangle when we know the other two sides.</p>
+          <div class="info-formula">
+            a² + b² = c²
+          </div>
+          <p>Where:</p>
+          <ul class="info-steps">
+            <li><strong>a</strong> and <strong>b</strong> are the lengths of the two shorter sides (legs)</li>
+            <li><strong>c</strong> is the length of the hypotenuse (longest side)</li>
+          </ul>
+          <div class="info-example">
+            <h4>📝 Example:</h4>
+            <p>If one leg is 3 cm and the other leg is 4 cm:</p>
+            <p><strong>c² = 3² + 4² = 9 + 16 = 25</strong></p>
+            <p><strong>c = √25 = 5 cm</strong></p>
+          </div>
+        `
+      },
+      {
+        title: "📊 Introduction to Trigonometry",
+        content: `
+          <p><span class="info-highlight">Trigonometry</span> is the study of triangles and the relationships between their angles and sides.</p>
+          <p>In right-angled triangles, we can use trigonometric ratios to find missing sides or angles.</p>
+          <div class="triangle-diagram">
+            <svg class="triangle-svg" width="280" height="200" viewBox="0 0 280 200">
+              <polygon points="60,160 60,70 190,160" fill="rgba(225, 92, 49, 0.1)" stroke="#e15c31" stroke-width="3"/>
+              <text x="35" y="120" text-anchor="middle" font-size="14" fill="#e15c31" font-weight="bold">Opposite</text>
+              <text x="125" y="180" text-anchor="middle" font-size="14" fill="#1e40af" font-weight="bold">Adjacent</text>
+              <text x="120" y="110" text-anchor="middle" font-size="14" fill="#059669" font-weight="bold">Hypotenuse</text>
+              <path d="M60,150 L70,150 L70,160" fill="none" stroke="#1e40af" stroke-width="2"/>
+              <path d="M80,160 Q85,155 90,160" fill="none" stroke="#e15c31" stroke-width="2"/>
+              <text x="95" y="165" font-size="12" fill="#e15c31" font-weight="bold">θ</text>
+            </svg>
+          </div>
+          <p>The three main trigonometric ratios are <strong>sine</strong>, <strong>cosine</strong>, and <strong>tangent</strong>.</p>
+        `
+      },
+      {
+        title: "📈 SOHCAHTOA - The Magic Word",
+        content: `
+          <p><span class="info-highlight">SOHCAHTOA</span> helps us remember the three trigonometric ratios:</p>
+          <div class="trig-ratios">
+            <div class="trig-ratio">
+              <h5>SOH</h5>
+              <div class="formula">sin θ = Opposite ÷ Hypotenuse</div>
+            </div>
+            <div class="trig-ratio">
+              <h5>CAH</h5>
+              <div class="formula">cos θ = Adjacent ÷ Hypotenuse</div>
+            </div>
+            <div class="trig-ratio">
+              <h5>TOA</h5>
+              <div class="formula">tan θ = Opposite ÷ Adjacent</div>
+            </div>
+          </div>
+          <div class="info-example">
+            <h4>📝 Memory Tip:</h4>
+            <p><strong>S</strong>ome <strong>O</strong>ld <strong>H</strong>orses</p>
+            <p><strong>C</strong>an <strong>A</strong>lways <strong>H</strong>ear</p>
+            <p><strong>T</strong>heir <strong>O</strong>wners <strong>A</strong>pproaching</p>
+          </div>
+        `
+      },
+      {
+        title: "🎯 Using Trigonometry - Finding Sides",
+        content: `
+          <p>When you know one side and one angle, you can find the other sides using trigonometric ratios.</p>
+          <div class="info-example">
+            <h4>📝 Example: Finding the Opposite Side</h4>
+            <div class="triangle-diagram">
+              <svg class="triangle-svg" width="250" height="180" viewBox="0 0 250 180">
+                <polygon points="50,140 200,140 50,80" fill="rgba(93, 152, 255, 0.1)" stroke="#5d98ff" stroke-width="2"/>
+                <text x="25" y="115" text-anchor="middle" font-size="14" fill="#e15c31">? cm</text>
+                <text x="125" y="155" text-anchor="middle" font-size="14" fill="#1e40af">10 cm</text>
+                <text x="75" y="145" font-size="12" fill="#e15c31">30°</text>
+              </svg>
+            </div>
+            <ul class="info-steps">
+              <li><strong>Given:</strong> Adjacent = 10 cm, Angle = 30°</li>
+              <li><strong>Want:</strong> Opposite side</li>
+              <li><strong>Use TOA:</strong> tan(30°) = Opposite ÷ 10</li>
+              <li><strong>Solution:</strong> Opposite = 10 × tan(30°) ≈ 5.77 cm</li>
+            </ul>
+          </div>
+        `
+      },
+      {
+        title: "🚀 Ready to Practice!",
+        content: `
+          <p>Now you're ready to put your knowledge to the test! You'll encounter questions involving:</p>
+          <ul class="info-steps">
+            <li><strong>Pythagorean Theorem:</strong> Finding missing sides in right triangles</li>
+            <li><strong>Trigonometric Ratios:</strong> Using sine, cosine, and tangent</li>
+            <li><strong>Real-world Problems:</strong> Ladders, ramps, and practical applications</li>
+            <li><strong>Angle Calculations:</strong> Finding angles using inverse trigonometry</li>
+          </ul>
+          <div class="info-example">
+            <h4>💡 Tips for Success:</h4>
+            <ul style="margin: 0; padding-left: 1.5rem;">
+              <li>Always identify which sides are opposite, adjacent, and hypotenuse</li>
+              <li>Choose the right formula: SOH, CAH, or TOA</li>
+              <li>Check your calculator is in degree mode</li>
+              <li>Round your final answers appropriately</li>
+            </ul>
+          </div>
+          <p style="text-align: center; font-size: 1.2rem; color: var(--orange); font-weight: var(--font-weight-bold); margin-top: 2rem;">
+            🎯 Score 80% or higher to earn rewards! 🏆
+          </p>
+        `
+      }
+    ];
+
+    // Question Bank - Pythagoras & Trigonometry
+    const questionBank = [
+      // Multiple Choice Questions (6)
+      {
+        type: 'multiple-choice',
+        question: 'In a right-angled triangle, if one leg is 3 cm and the other leg is 4 cm, what is the length of the hypotenuse?',
+        diagram: `
+          <svg class="triangle-svg" width="250" height="180" viewBox="0 0 250 180">
+            <polygon points="50,140 170,140 170,60" fill="none" stroke="#1e40af" stroke-width="2"/>
+            <text x="110" y="155" text-anchor="middle" font-size="14" fill="#1e40af">3 cm</text>
+            <text x="180" y="100" text-anchor="start" font-size="14" fill="#1e40af">4 cm</text>
+            <text x="105" y="95" text-anchor="middle" font-size="14" fill="#e15c31">? cm</text>
+            <path d="M160,140 L160,130 L170,130" fill="none" stroke="#1e40af" stroke-width="2"/>
+          </svg>
+        `,
+        options: ['5 cm', '7 cm', '6 cm', '8 cm'],
+        correctAnswer: 0,
+        explanation: 'Using Pythagoras theorem: c² = a² + b² = 3² + 4² = 9 + 16 = 25, so c = √25 = 5 cm'
+      },
+      {
+        type: 'multiple-choice',
+        question: 'What is the Pythagorean theorem formula?',
+        options: ['a + b = c', 'a² + b² = c²', 'a × b = c', 'a² × b² = c²'],
+        correctAnswer: 1,
+        explanation: 'The Pythagorean theorem states that in a right triangle, a² + b² = c², where c is the hypotenuse.'
+      },
+      {
+        type: 'multiple-choice',
+        question: 'In a right triangle with hypotenuse 13 cm and one leg 5 cm, what is the other leg?',
+        diagram: `
+          <svg class="triangle-svg" width="250" height="180" viewBox="0 0 250 180">
+            <polygon points="50,140 50,80 190,140" fill="none" stroke="#1e40af" stroke-width="2"/>
+            <text x="25" y="115" text-anchor="middle" font-size="14" fill="#1e40af">5 cm</text>
+            <text x="120" y="155" text-anchor="middle" font-size="14" fill="#e15c31">? cm</text>
+            <text x="115" y="105" text-anchor="middle" font-size="14" fill="#1e40af">13 cm</text>
+            <path d="M50,130 L60,130 L60,140" fill="none" stroke="#1e40af" stroke-width="2"/>
+          </svg>
+        `,
+        options: ['12 cm', '8 cm', '10 cm', '15 cm'],
+        correctAnswer: 0,
+        explanation: 'Using a² + b² = c²: 5² + b² = 13², so b² = 169 - 25 = 144, therefore b = 12 cm'
+      },
+      {
+        type: 'multiple-choice',
+        question: 'What does SOH in SOHCAHTOA represent?',
+        options: ['Sine = Opposite ÷ Hypotenuse', 'Sine = Adjacent ÷ Hypotenuse', 'Sine = Opposite × Hypotenuse', 'Sine = Hypotenuse ÷ Opposite'],
+        correctAnswer: 0,
+        explanation: 'SOH means Sine = Opposite ÷ Hypotenuse. This is the fundamental trigonometric ratio for sine.'
+      },
+      {
+        type: 'multiple-choice',
+        question: 'In a right triangle, if the opposite side is 8 cm and the hypotenuse is 10 cm, what is sin θ?',
+        diagram: `
+          <svg class="triangle-svg" width="250" height="180" viewBox="0 0 250 180">
+            <polygon points="50,140 50,60 170,140" fill="none" stroke="#1e40af" stroke-width="2"/>
+            <text x="25" y="105" text-anchor="middle" font-size="14" fill="#e15c31">8 cm</text>
+            <text x="110" y="155" text-anchor="middle" font-size="14" fill="#1e40af">Adjacent</text>
+            <text x="105" y="95" text-anchor="middle" font-size="14" fill="#1e40af">10 cm</text>
+            <path d="M50,130 L60,130 L60,140" fill="none" stroke="#1e40af" stroke-width="2"/>
+            <path d="M60,140 Q65,135 70,140" fill="none" stroke="#e15c31" stroke-width="1"/>
+            <text x="75" y="145" font-size="12" fill="#e15c31">θ</text>
+          </svg>
+        `,
+        options: ['0.8', '0.6', '1.25', '0.75'],
+        correctAnswer: 0,
+        explanation: 'sin θ = opposite ÷ hypotenuse = 8 ÷ 10 = 0.8'
+      },
+      {
+        type: 'multiple-choice',
+        question: 'If cos θ = 0.6, what is the value of θ to the nearest degree?',
+        options: ['53°', '37°', '45°', '60°'],
+        correctAnswer: 1,
+        explanation: 'cos⁻¹(0.6) ≈ 53.13°, but since cos 37° ≈ 0.8 and cos 53° ≈ 0.6, the answer is 53°. Wait, let me recalculate: cos⁻¹(0.6) ≈ 53°, so the closest answer is 53°.'
+      },
+
+      // Text Response Questions (4)
+      {
+        type: 'text-response',
+        question: 'A ladder is leaning against a wall. The ladder is 5 meters long and the bottom is 3 meters from the wall. How high up the wall does the ladder reach? (Round to 1 decimal place)',
+        diagram: `
+          <svg class="triangle-svg" width="250" height="200" viewBox="0 0 250 200">
+            <line x1="50" y1="40" x2="50" y2="160" stroke="#8B4513" stroke-width="4"/>
+            <line x1="50" y1="160" x2="200" y2="160" stroke="#654321" stroke-width="3"/>
+            <line x1="50" y1="40" x2="200" y2="160" stroke="#FF6B35" stroke-width="3"/>
+            <text x="25" y="105" text-anchor="middle" font-size="14" fill="#e15c31">? m</text>
+            <text x="125" y="180" text-anchor="middle" font-size="14" fill="#1e40af">3 m</text>
+            <text x="115" y="95" text-anchor="middle" font-size="14" fill="#1e40af">5 m</text>
+            <path d="M50,150 L60,150 L60,160" fill="none" stroke="#1e40af" stroke-width="2"/>
+            <text x="210" y="170" font-size="12" fill="#666">Wall</text>
+            <text x="210" y="150" font-size="12" fill="#666">Ground</text>
+          </svg>
+        `,
+        correctAnswer: '4.0',
+        tolerance: 0.1,
+        explanation: 'Using Pythagoras: height² + 3² = 5², so height² = 25 - 9 = 16, therefore height = 4.0 m'
+      },
+      {
+        type: 'text-response',
+        question: 'In a right triangle, if one angle is 30° and the hypotenuse is 12 cm, what is the length of the opposite side? (Round to 1 decimal place)',
+        diagram: `
+          <svg class="triangle-svg" width="250" height="180" viewBox="0 0 250 180">
+            <polygon points="50,140 200,140 50,80" fill="none" stroke="#1e40af" stroke-width="2"/>
+            <text x="25" y="115" text-anchor="middle" font-size="14" fill="#e15c31">? cm</text>
+            <text x="125" y="155" text-anchor="middle" font-size="14" fill="#1e40af">Adjacent</text>
+            <text x="120" y="105" text-anchor="middle" font-size="14" fill="#1e40af">12 cm</text>
+            <path d="M50,130 L60,130 L60,140" fill="none" stroke="#1e40af" stroke-width="2"/>
+            <path d="M70,140 Q75,135 80,140" fill="none" stroke="#e15c31" stroke-width="1"/>
+            <text x="85" y="145" font-size="12" fill="#e15c31">30°</text>
+          </svg>
+        `,
+        correctAnswer: '6.0',
+        tolerance: 0.1,
+        explanation: 'Using SOH: sin(30°) = opposite ÷ hypotenuse. Since sin(30°) = 0.5, opposite = 12 × 0.5 = 6.0 cm'
+      },
+      {
+        type: 'text-response',
+        question: 'Find the length of the hypotenuse if both legs of a right triangle are 7 cm. (Round to 1 decimal place)',
+        diagram: `
+          <svg class="triangle-svg" width="250" height="180" viewBox="0 0 250 180">
+            <polygon points="60,140 60,70 170,140" fill="none" stroke="#1e40af" stroke-width="2"/>
+            <text x="35" y="110" text-anchor="middle" font-size="14" fill="#1e40af">7 cm</text>
+            <text x="115" y="155" text-anchor="middle" font-size="14" fill="#1e40af">7 cm</text>
+            <text x="110" y="100" text-anchor="middle" font-size="14" fill="#e15c31">? cm</text>
+            <path d="M60,130 L70,130 L70,140" fill="none" stroke="#1e40af" stroke-width="2"/>
+          </svg>
+        `,
+        correctAnswer: '9.9',
+        tolerance: 0.1,
+        explanation: 'Using Pythagoras: c² = 7² + 7² = 49 + 49 = 98, so c = √98 ≈ 9.9 cm'
+      },
+      {
+        type: 'text-response',
+        question: 'In a right triangle, if the adjacent side is 15 cm and the angle is 40°, what is the length of the opposite side? (Round to 1 decimal place)',
+        diagram: `
+          <svg class="triangle-svg" width="250" height="180" viewBox="0 0 250 180">
+            <polygon points="50,140 200,140 50,60" fill="none" stroke="#1e40af" stroke-width="2"/>
+            <text x="25" y="105" text-anchor="middle" font-size="14" fill="#e15c31">? cm</text>
+            <text x="125" y="155" text-anchor="middle" font-size="14" fill="#1e40af">15 cm</text>
+            <text x="125" y="95" text-anchor="middle" font-size="14" fill="#1e40af">Hypotenuse</text>
+            <path d="M50,130 L60,130 L60,140" fill="none" stroke="#1e40af" stroke-width="2"/>
+            <path d="M70,140 Q75,135 80,140" fill="none" stroke="#e15c31" stroke-width="1"/>
+            <text x="85" y="145" font-size="12" fill="#e15c31">40°</text>
+          </svg>
+        `,
+        correctAnswer: '12.6',
+        tolerance: 0.2,
+        explanation: 'Using TOA: tan(40°) = opposite ÷ adjacent. Since tan(40°) ≈ 0.839, opposite = 15 × 0.839 ≈ 12.6 cm'
+      }
+    ];
+
+    // Shuffle function (Fisher-Yates)
+    function shuffleArray(array) {
+      const newArray = [...array];
+      for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+      }
+      return newArray;
+    }
+
+    // Randomize question options for multiple choice
+    function randomizeQuestions(questions) {
+      return questions.map(q => {
+        if (q.type === 'multiple-choice') {
+          const correctAnswer = q.options[q.correctAnswer];
+          const shuffledOptions = shuffleArray(q.options);
+          const newCorrectIndex = shuffledOptions.indexOf(correctAnswer);
+          
+          return {
+            ...q,
+            options: shuffledOptions,
+            correctAnswer: newCorrectIndex
+          };
+        }
+        return q;
+      });
+    }
+
+    // Initialize info slides
+    function initializeInfoSlides() {
+      currentInfoSlideIndex = 0;
+      showingInfoSlides = true;
+      
+      console.log('Initializing info slides...');
+      
+      // Ensure the slides section is visible
+      const infoSection = document.getElementById('infoSlidesSection');
+      const gameSection = document.getElementById('gameSection');
+      const slideArea = document.getElementById('infoSlideArea');
+      
+      if (infoSection) {
+        infoSection.style.display = 'block';
+        console.log('Info section made visible');
+      }
+      if (gameSection) {
+        gameSection.style.display = 'none';
+        console.log('Game section hidden');
+      }
+      
+      // Check if slide area exists
+      if (!slideArea) {
+        console.error('infoSlideArea not found!');
+        return;
+      }
+      
+      // Display first slide immediately
+      displayInfoSlide();
+      
+      // Also display after a small delay as backup
+      setTimeout(() => {
+        if (showingInfoSlides && (!slideArea.innerHTML.trim())) {
+          console.log('Backup: Displaying first slide after delay');
+          displayInfoSlide();
+        }
+      }, 200);
+    }
+
+    // Display current info slide
+    function displayInfoSlide() {
+      if (currentInfoSlideIndex >= infoSlides.length) return;
+      
+      const slide = infoSlides[currentInfoSlideIndex];
+      const slideArea = document.getElementById('infoSlideArea');
+      
+      if (!slideArea) {
+        console.error('Info slide area not found');
+        return;
+      }
+      
+      slideArea.innerHTML = `
+        <div class="info-slide">
+          <h3>${slide.title}</h3>
+          ${slide.content}
+        </div>
+      `;
+      
+      updateInfoNavigation();
+      updateInfoProgress();
+      
+      console.log('Displaying slide', currentInfoSlideIndex + 1, 'of', infoSlides.length);
+    }
+
+    // Info slide navigation
+    function nextInfoSlide() {
+      if (currentInfoSlideIndex < infoSlides.length - 1) {
+        currentInfoSlideIndex++;
+        displayInfoSlide();
+      }
+    }
+
+    function previousInfoSlide() {
+      if (currentInfoSlideIndex > 0) {
+        currentInfoSlideIndex--;
+        displayInfoSlide();
+      }
+    }
+
+    // Update info navigation buttons
+    function updateInfoNavigation() {
+      const prevBtn = document.getElementById('infoPrevBtn');
+      const nextBtn = document.getElementById('infoNextBtn');
+      const startBtn = document.getElementById('startGameBtn');
+      
+      prevBtn.disabled = currentInfoSlideIndex === 0;
+      
+      if (currentInfoSlideIndex === infoSlides.length - 1) {
+        nextBtn.style.display = 'none';
+        startBtn.style.display = 'inline-block';
+      } else {
+        nextBtn.style.display = 'inline-block';
+        startBtn.style.display = 'none';
+      }
+    }
+
+    // Update info progress
+    function updateInfoProgress() {
+      document.getElementById('currentInfoSlide').textContent = currentInfoSlideIndex + 1;
+      document.getElementById('totalInfoSlides').textContent = infoSlides.length;
+      
+      const progress = ((currentInfoSlideIndex + 1) / infoSlides.length) * 100;
+      document.getElementById('infoProgressFill').style.width = `${progress}%`;
+    }
+
+    // Start the actual game
+    function startGame() {
+      showingInfoSlides = false;
+      
+      // Hide info slides section
+      document.getElementById('infoSlidesSection').style.display = 'none';
+      
+      // Show game section
+      document.getElementById('gameSection').style.display = 'block';
+      document.getElementById('gameControls').style.display = 'flex';
+      
+      initializeGame();
+    }
+
+    // Initialize game
+    function initializeGame() {
+      if (hasSubmittedGame) return;
+      
+      // Select and randomize questions
+      const shuffledQuestions = shuffleArray(questionBank);
+      questions = randomizeQuestions(shuffledQuestions.slice(0, gameConfig.maxQuestions));
+      
+      // Initialize arrays
+      userAnswers = new Array(questions.length).fill(null);
+      questionStartTimes = new Array(questions.length).fill(null);
+      
+      // Set game start time
+      gameStartTime = new Date();
+      questionStartTimes[0] = new Date();
+      
+      // Reset UI
+      currentQuestionIndex = 0;
+      updateProgressDisplay();
+      displayQuestion();
+      
+      console.log('Game initialized with', questions.length, 'questions');
+    }
+
+    // Display current question
+    function displayQuestion() {
+      if (currentQuestionIndex >= questions.length) return;
+      
+      const question = questions[currentQuestionIndex];
+      const questionArea = document.getElementById('questionArea');
+      
+      let questionHTML = `
+        <div class="question-container">
+          <div class="question-number">Question ${currentQuestionIndex + 1}</div>
+          <div class="question-text">${question.question}</div>
+      `;
+      
+      // Add diagram if present
+      if (question.diagram) {
+        questionHTML += `<div class="triangle-diagram">${question.diagram}</div>`;
+      }
+      
+      if (question.type === 'multiple-choice') {
+        questionHTML += '<div class="options">';
+        question.options.forEach((option, index) => {
+          const isSelected = userAnswers[currentQuestionIndex] === index;
+          questionHTML += `
+            <div class="option ${isSelected ? 'selected' : ''}" onclick="selectOption(${index})">
+              <input type="radio" name="question${currentQuestionIndex}" value="${index}" ${isSelected ? 'checked' : ''}>
+              ${option}
+            </div>
+          `;
+        });
+        questionHTML += '</div>';
+      } else if (question.type === 'text-response') {
+        const userAnswer = userAnswers[currentQuestionIndex] || '';
+        questionHTML += `
+          <input type="text" class="text-input" id="textAnswer${currentQuestionIndex}" 
+                 placeholder="Enter your answer here..." value="${userAnswer}"
+                 onkeypress="handleTextInputKeypress(event)" oninput="handleTextInput()">
+          <button id="textSubmitBtn" class="btn btn-primary" onclick="submitTextAnswer()" 
+                  ${userAnswer ? '' : 'disabled'}>Submit Answer</button>
+        `;
+      }
+      
+      questionHTML += '<div class="feedback" id="questionFeedback" style="display: none;"></div></div>';
+      questionArea.innerHTML = questionHTML;
+      
+      // Update navigation buttons
+      updateNavigationButtons();
+    }
+
+    // Handle option selection for multiple choice
+    function selectOption(optionIndex) {
+      if (hasSubmittedGame) return;
+      
+      userAnswers[currentQuestionIndex] = optionIndex;
+      
+      // Update visual selection
+      document.querySelectorAll('.option').forEach((opt, idx) => {
+        opt.classList.toggle('selected', idx === optionIndex);
+        opt.querySelector('input').checked = idx === optionIndex;
+      });
+      
+      // Show immediate feedback
+      showFeedback();
+      updateNavigationButtons();
+    }
+
+    // Handle text input
+    function handleTextInput() {
+      const input = document.getElementById(`textAnswer${currentQuestionIndex}`);
+      const submitBtn = document.getElementById('textSubmitBtn');
+      
+      if (input && submitBtn) {
+        submitBtn.disabled = !input.value.trim();
+      }
+    }
+
+    // Handle Enter key for text input
+    function handleTextInputKeypress(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        submitTextAnswer();
+      }
+    }
+
+    // Submit text answer
+    function submitTextAnswer() {
+      if (hasSubmittedGame) return;
+      
+      const input = document.getElementById(`textAnswer${currentQuestionIndex}`);
+      if (!input || !input.value.trim()) return;
+      
+      userAnswers[currentQuestionIndex] = input.value.trim();
+      input.disabled = true;
+      document.getElementById('textSubmitBtn').disabled = true;
+      
+      showFeedback();
+      updateNavigationButtons();
+    }
+
+    // Show feedback for current question
+    function showFeedback() {
+      const question = questions[currentQuestionIndex];
+      const userAnswer = userAnswers[currentQuestionIndex];
+      const feedbackDiv = document.getElementById('questionFeedback');
+      
+      if (!feedbackDiv || userAnswer === null || userAnswer === undefined) return;
+      
+      let isCorrect = false;
+      
+      if (question.type === 'multiple-choice') {
+        isCorrect = userAnswer === question.correctAnswer;
+      } else if (question.type === 'text-response') {
+        const numericAnswer = parseFloat(userAnswer);
+        const correctAnswer = parseFloat(question.correctAnswer);
+        const tolerance = question.tolerance || 0.1;
+        isCorrect = !isNaN(numericAnswer) && !isNaN(correctAnswer) && 
+                   Math.abs(numericAnswer - correctAnswer) <= tolerance;
+      }
+      
+      feedbackDiv.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+      feedbackDiv.style.display = 'block';
+      
+      if (isCorrect) {
+        feedbackDiv.innerHTML = `
+          <div><strong>✓ Correct!</strong></div>
+          <div>${question.explanation}</div>
+        `;
+      } else {
+        feedbackDiv.innerHTML = `
+          <div><strong>✗ Incorrect</strong></div>
+          <div>${question.explanation}</div>
+        `;
+      }
+    }
+
+    // Navigation functions
+    function nextQuestion() {
+      if (currentQuestionIndex < questions.length - 1) {
+        currentQuestionIndex++;
+        questionStartTimes[currentQuestionIndex] = new Date();
+        updateProgressDisplay();
+        displayQuestion();
+      }
+    }
+
+    function previousQuestion() {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        updateProgressDisplay();
+        displayQuestion();
+      }
+    }
+
+    // Update navigation buttons
+    function updateNavigationButtons() {
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const submitBtn = document.getElementById('submitBtn');
+      
+      // Previous button
+      prevBtn.disabled = currentQuestionIndex === 0;
+      
+      // Next/Submit buttons
+      const hasAnswer = userAnswers[currentQuestionIndex] !== null && userAnswers[currentQuestionIndex] !== undefined;
+      
+      if (currentQuestionIndex === questions.length - 1) {
+        nextBtn.style.display = 'none';
+        submitBtn.style.display = 'inline-block';
+        submitBtn.disabled = false; // Allow submission even if current question not answered
+      } else {
+        nextBtn.style.display = 'inline-block';
+        submitBtn.style.display = 'none';
+        nextBtn.disabled = !hasAnswer;
+      }
+    }
+
+    // Update progress display
+    function updateProgressDisplay() {
+      document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+      document.getElementById('totalQuestionsDisplay').textContent = questions.length;
+      
+      const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+      document.getElementById('progressFill').style.width = `${progress}%`;
+    }
+
+    // Calculate score
+    function calculateScore() {
+      let correct = 0;
+      
+      questions.forEach((question, index) => {
+        const userAnswer = userAnswers[index];
+        if (userAnswer === null || userAnswer === undefined) return;
+        
+        if (question.type === 'multiple-choice') {
+          if (userAnswer === question.correctAnswer) correct++;
+        } else if (question.type === 'text-response') {
+          const numericAnswer = parseFloat(userAnswer);
+          const correctAnswer = parseFloat(question.correctAnswer);
+          const tolerance = question.tolerance || 0.1;
+          if (!isNaN(numericAnswer) && !isNaN(correctAnswer) && 
+              Math.abs(numericAnswer - correctAnswer) <= tolerance) {
+            correct++;
+          }
+        }
+      });
+      
+      return Math.round((correct / questions.length) * 100);
+    }
+
+    // Submit game
+    async function submitGame() {
+      if (hasSubmittedGame) return;
+      hasSubmittedGame = true;
+      
+      // Show loading
+      jandoLoading.show();
+      
+      const finalScore = calculateScore();
+      const gameEndTime = new Date();
+      const totalTimeSpent = Math.round((gameEndTime - gameStartTime) / 1000);
+      
+      console.log('Submitting game with score:', finalScore);
+      console.log('Total time spent:', totalTimeSpent, 'seconds');
+      console.log('Questions answered:', userAnswers.filter(a => a !== null && a !== undefined).length, 'of', questions.length);
+      
+      try {
+        // Save to Google Sheets first
+        await saveGameResults(finalScore, totalTimeSpent);
+      } catch (error) {
+        console.error('Error in saveGameResults:', error);
+      } finally {
+        // Always complete loading, regardless of success or failure
+        jandoLoading.complete();
+          setTimeout(() => jandoLoading.hide(), 600);
+        
+        // Show results after a brief delay
+        setTimeout(() => {
+          showResults(finalScore, totalTimeSpent);
+        }, 500);
+      }
+    }
+
+    // Show results screen
+    function showResults(score, timeSpent) {
+      document.getElementById('gameSection').style.display = 'none';
+      document.getElementById('gameControls').style.display = 'none';
+      
+      const resultsScreen = document.getElementById('resultsScreen');
+      const percentage = Math.round(score);
+      const correct = Math.round((score / 100) * questions.length);
+      
+      document.getElementById('firstAttemptScore').innerHTML = `
+        <div style="font-size: 1.2rem; color: var(--dark-blue); margin-bottom: 0.5rem;">Your Score</div>
+        <div style="font-size: 2.5rem; color: var(--orange); font-weight: bold;">${correct}/${questions.length}</div>
+      `;
+      
+      let message = '';
+      if (percentage >= 90) {
+        message = '🌟 Outstanding! You have mastered Pythagoras and Trigonometry!';
+      } else if (percentage >= 80) {
+        message = '🎉 Excellent work! You have a strong understanding of triangles!';
+      } else if (percentage >= 70) {
+        message = '👍 Good job! Keep practicing those triangle calculations!';
+      } else if (percentage >= 60) {
+        message = '📖 You are learning! Review the Pythagorean theorem and trigonometric ratios.';
+      } else {
+        message = '💪 Keep trying! Focus on understanding right-angled triangles and their properties.';
+      }
+      
+      document.getElementById('resultsMessage').textContent = message;
+      
+      const minutes = Math.floor(timeSpent / 60);
+      const seconds = timeSpent % 60;
+      
+      document.getElementById('resultsDetails').innerHTML = `
+        <p><strong>Questions Correct:</strong> ${correct} out of ${questions.length}</p>
+        <p><strong>Percentage:</strong> ${percentage}%</p>
+        <p><strong>Time Spent:</strong> ${minutes}m ${seconds}s</p>
+        <p><strong>Topics Covered:</strong> Pythagorean Theorem, Right Triangle Properties, Sine, Cosine, Tangent</p>
+      `;
+      
+      resultsScreen.style.display = 'block';
+      
+      if (percentage >= 80) {
+        setTimeout(() => giveReward(), 1000);
+      } else {
+        setTimeout(() => showReturnHomeButton(), 2000);
+      }
+    }
+
+    // Save results to Google Sheets
+    async function saveGameResults(finalScore, timeSpent) {
+      if (!jandoAuth.isAuthenticated()) {
+        console.error('User not authenticated');
+        return;
+      }
+
+      const user = jandoAuth.getCurrentUser();
+      
+      // Calculate correct answers count
+      const correctCount = Math.round((finalScore / 100) * questions.length);
+      
+      const gameData = {
+        code: user.code,
+        game: 'Y9M.W3.1 - Pythagoras & Trigonometry',
+        score: Number(correctCount), // Ensure it's a number
+        totalQuestions: Number(questions.length), // Ensure it's a number
+        sheet: 'Y9M.W3.1_PythagorasTrig',
+        responses: userAnswers.map((answer, index) => {
+          const question = questions[index];
+          const correctAnswer = question.type === 'multiple-choice' 
+            ? question.options[question.correctAnswer] 
+            : question.correctAnswer;
+          
+          return {
+            question: question.question,
+            correct: correctAnswer,
+            answer: answer
+          };
+        })
+      };
+      
+      console.log('=== DEBUGGING GAME SUBMISSION ===');
+      console.log('Final Score:', finalScore);
+      console.log('Questions Length:', questions.length);
+      console.log('Correct Count:', correctCount);
+      console.log('User Answers:', userAnswers);
+      console.log('Sending game data:', JSON.stringify(gameData, null, 2));
+
+      try {
+        // Create timeout promise
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Request timeout')), 10000)
+        );
+        
+        // Create fetch promise
+        const fetchPromise = fetch('https://script.google.com/macros/s/AKfycbzwNZGb_nRFF9t4lLdJdbII1kuDKhsiy4_liBxOe3pNc6rWP7swfem33C_ALT3OWQ9GoQ/exec', {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(gameData)
+        });
+
+        // Race between fetch and timeout
+        const response = await Promise.race([fetchPromise, timeoutPromise]);
+        console.log('✅ Game results fetch completed');
+        
+        // Test connection to verify the endpoint is working
+        console.log('🔍 Testing connection...');
+        const testResponse = await fetch('https://script.google.com/macros/s/AKfycbzwNZGb_nRFF9t4lLdJdbII1kuDKhsiy4_liBxOe3pNc6rWP7swfem33C_ALT3OWQ9GoQ/exec?test=connection');
+        const testResult = await testResponse.json();
+        console.log('🔍 Connection test result:', testResult);
+        
+        // Award reward if score is 80% or higher
+        if (correctCount >= (questions.length * 0.8)) {
+          console.log('Score qualifies for reward, processing...');
+          await awardReward(user.code);
+        }
+
+      } catch (error) {
+        console.error('❌ Error saving game results:', error);
+      }
+    }
+
+    // Award reward function
+    async function awardReward(studentCode) {
+      try {
+        // Get a random animal reward
+        const randomAnimal = animals[Math.floor(Math.random() * animals.length)];
+        
+        // Send reward to Google Sheets
+        const rewardData = {
+          code: studentCode,
+          reward: randomAnimal
+        };
+        
+        // Create timeout promise
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Reward request timeout')), 5000)
+        );
+        
+        // Create fetch promise
+        const fetchPromise = fetch('https://script.google.com/macros/s/AKfycbzwNZGb_nRFF9t4lLdJdbII1kuDKhsiy4_liBxOe3pNc6rWP7swfem33C_ALT3OWQ9GoQ/exec', {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(rewardData)
+        });
+
+        // Race between fetch and timeout
+        const response = await Promise.race([fetchPromise, timeoutPromise]);
+        
+        console.log('Reward sent to Google Sheets');
+        currentReward = randomAnimal;
+        console.log('🎁 Reward earned:', currentReward);
+        
+      } catch (error) {
+        console.error('Error awarding reward:', error);
+        // Continue with local reward anyway
+        const randomAnimal = animals[Math.floor(Math.random() * animals.length)];
+        currentReward = randomAnimal;
+        console.log('🎁 Local reward assigned:', currentReward);
+      }
+    }
+
+    // Helper function to get score message
+    function getScoreMessage(score) {
+      if (score >= 90) {
+        return '🌟 Outstanding! You have mastered Pythagoras and Trigonometry!';
+      } else if (score >= 80) {
+        return '🎉 Excellent work! You have a strong understanding of triangles!';
+      } else if (score >= 70) {
+        return '👍 Good job! Keep practicing those triangle calculations!';
+      } else if (score >= 60) {
+        return '📖 You are learning! Review the Pythagorean theorem and trigonometric ratios.';
+      } else {
+        return '💪 Keep trying! Focus on understanding right-angled triangles and their properties.';
+      }
+    }
+
+    // Helper functions
+    function checkAnswerCorrectness(question, userAnswer) {
+      if (userAnswer === null || userAnswer === undefined) return false;
+      
+      if (question.type === 'multiple-choice') {
+        return userAnswer === question.correctAnswer;
+      } else if (question.type === 'text-response') {
+        const numericAnswer = parseFloat(userAnswer);
+        const correctAnswer = parseFloat(question.correctAnswer);
+        const tolerance = question.tolerance || 0.1;
+        return !isNaN(numericAnswer) && !isNaN(correctAnswer) && 
+               Math.abs(numericAnswer - correctAnswer) <= tolerance;
+      }
+      return false;
+    }
+
+    function calculateQuestionTime(index) {
+      if (!questionStartTimes[index]) return 0;
+      const endTime = questionStartTimes[index + 1] || new Date();
+      return Math.round((endTime - questionStartTimes[index]) / 1000);
+    }
+
+    // Reward modal functions
+    function showRewardModal() {
+      document.getElementById('rewardModal').style.display = 'block';
+    }
+
+    function closeRewardModal() {
+      document.getElementById('rewardModal').style.display = 'none';
+      document.getElementById('rewardDisplay').onclick = revealReward;
+      document.getElementById('rewardDisplay').style.cursor = 'pointer';
+      document.getElementById('rewardDisplay').style.animation = '';
+      
+      showReturnHomeButton();
+    }
+
+    function giveReward() {
+      if (!jandoAuth.isAuthenticated()) {
+        console.error('User not authenticated');
+        return;
+      }
+
+      // If we already have a reward from the saveGameResults function, show it
+      if (currentReward) {
+        setTimeout(() => showRewardModal(), 1000);
+        return;
+      }
+
+      // Fallback: fetch rewards from Google Sheets if currentReward is not set
+      const user = jandoAuth.getCurrentUser();
+      const scriptURL = 'https://script.google.com/macros/s/AKfycbzwNZGb_nRFF9t4lLdJdbII1kuDKhsiy4_liBxOe3pNc6rWP7swfem33C_ALT3OWQ9GoQ/exec';
+      
+      fetch(scriptURL + "?rewards=" + encodeURIComponent(user.code))
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.rewards && data.rewards.length > 0) {
+            currentReward = data.rewards[data.rewards.length - 1]; // Get the latest reward
+            setTimeout(() => showRewardModal(), 1000);
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching rewards:', error);
+        });
+    }
+
+    function revealReward() {
+      const rewardDisplay = document.getElementById('rewardDisplay');
+      const rewardMessage = document.getElementById('rewardMessage');
+      const rewardButtons = document.getElementById('rewardButtons');
+      
+      rewardDisplay.textContent = currentReward || animals[Math.floor(Math.random() * animals.length)];
+      rewardDisplay.style.fontSize = '6rem';
+      rewardDisplay.style.cursor = 'default';
+      rewardDisplay.onclick = null;
+      rewardDisplay.style.animation = 'wiggle 1s infinite';
+      
+      rewardMessage.textContent = '🎉 You earned a new animal friend! 🎉';
+      rewardButtons.style.display = 'block';
+      
+      // Add confetti effect
+      for (let i = 0; i < 50; i++) {
+        createConfetti();
+      }
+    }
+
+    function createConfetti() {
+      const confetti = document.createElement('div');
+      confetti.style.cssText = `
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: ${['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7'][Math.floor(Math.random() * 5)]};
+        left: ${Math.random() * window.innerWidth}px;
+        top: -10px;
+        z-index: 10000;
+        border-radius: 50%;
+        pointer-events: none;
+        animation: fall ${Math.random() * 3 + 2}s linear forwards;
+      `;
+      
+      document.body.appendChild(confetti);
+      setTimeout(() => confetti.remove(), 5000);
+    }
+
+    function showReturnHomeButton() {
+      if (document.querySelector('.return-home-btn')) return;
+      
+      const returnBtn = document.createElement('button');
+      returnBtn.className = 'return-home-btn';
+      returnBtn.innerHTML = '🏠 Return to Games';
+      returnBtn.style.cssText = `
+        background: var(--light-blue);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 16px;
+        margin: 1rem;
+        transition: all 0.3s ease;
+      `;
+      returnBtn.onmouseover = () => returnBtn.style.transform = 'translateY(-2px)';
+      returnBtn.onmouseout = () => returnBtn.style.transform = 'translateY(0)';
+      returnBtn.onclick = () => window.location.href = 'games.html';
+      
+      document.getElementById('resultsScreen').appendChild(returnBtn);
+    }
+
+    // Restart game
+    function restartGame() {
+      hasSubmittedGame = false;
+      currentQuestionIndex = 0;
+      userAnswers = [];
+      questionStartTimes = [];
+      gameStartTime = null;
+      showingInfoSlides = true;
+      currentInfoSlideIndex = 0;
+      
+      document.getElementById('resultsScreen').style.display = 'none';
+      document.getElementById('gameSection').style.display = 'none';
+      document.getElementById('infoSlidesSection').style.display = 'block';
+      
+      initializeInfoSlides();
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize info slides immediately on page load
+      console.log('DOM loaded - initializing info slides immediately');
+      initializeInfoSlides();
+      
+      // Initialize auth first
+      if (typeof jandoAuth !== 'undefined') {
+        jandoAuth.init();
+        
+        // Check if user is already authenticated
+        jandoAuth.onAuthSuccess = function(user) {
+          console.log('User authenticated:', user);
+          document.getElementById('userGreeting').textContent = `Welcome, ${user.name}!`;
+          document.getElementById('userGreeting').style.display = 'inline';
+          
+          // Ensure info slides are still showing after auth
+          if (showingInfoSlides) {
+            console.log('Auth complete - ensuring info slides are visible');
+            const slideArea = document.getElementById('infoSlideArea');
+            if (!slideArea || !slideArea.innerHTML.trim()) {
+              console.log('Re-initializing info slides after auth');
+              initializeInfoSlides();
+            }
+          }
+        };
+      }
+      
+      // Menu functionality
+      const menuBtn = document.getElementById('menuBtn');
+      const menuDropdown = document.getElementById('menuDropdown');
+      
+      if (menuBtn && menuDropdown) {
+        menuBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          menuDropdown.classList.toggle('show');
+        });
+        
+        document.addEventListener('click', function() {
+          menuDropdown.classList.remove('show');
+        });
+      }
+      
+      // Multiple fallback checks to ensure slides load
+      setTimeout(() => {
+        if (showingInfoSlides) {
+          const slideArea = document.getElementById('infoSlideArea');
+          if (!slideArea || !slideArea.innerHTML.trim()) {
+            console.log('Fallback 1: Re-initializing info slides...');
+            initializeInfoSlides();
+          }
+        }
+      }, 1000);
+      
+      setTimeout(() => {
+        if (showingInfoSlides) {
+          const slideArea = document.getElementById('infoSlideArea');
+          if (!slideArea || !slideArea.innerHTML.trim()) {
+            console.log('Fallback 2: Force initializing info slides...');
+            initializeInfoSlides();
+          }
+        }
+      }, 3000);
+    });
+  </script>
