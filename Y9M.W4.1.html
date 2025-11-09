@@ -127,7 +127,7 @@
         }
 
         .btn-secondary:hover:not(:disabled) {
-            background: var(--secondary-blue-dark);
+            background: #1e3a8a;
             transform: translateY(-1px);
         }
 
@@ -341,7 +341,7 @@
         }
 
         .next-btn:hover {
-            background: var(--secondary-blue-dark);
+            background: #1e3a8a;
             transform: translateY(-1px);
         }
 
@@ -383,7 +383,7 @@
         }
 
         .return-home-btn:hover {
-            background: var(--secondary-blue-dark);
+            background: #1e3a8a;
             transform: translateY(-1px);
         }
 
@@ -579,9 +579,9 @@
                     </div>
 
                     <div class="example-box">
-                        <strong>Example: x/5 = 4</strong>
+                        <strong>Example: x ÷ 5 = 4</strong>
                         <div class="step">Multiply both sides by 5:</div>
-                        <div class="equation">(x/5) × 5 = 4 × 5</div>
+                        <div class="equation">(x ÷ 5) × 5 = 4 × 5</div>
                         <div class="equation">x = 20</div>
                     </div>
                 </div>
@@ -646,23 +646,17 @@
             <div class="slide-nav">
                 <button id="prevBtn" class="nav-btn" onclick="changeSlide(-1)" disabled>← Previous</button>
                 <div class="slide-indicator">
-                    <span class="dot active" onclick="currentSlide(1)"></span>
-                    <span class="dot" onclick="currentSlide(2)"></span>
-                    <span class="dot" onclick="currentSlide(3)"></span>
-                    <span class="dot" onclick="currentSlide(4)"></span>
-                    <span class="dot" onclick="currentSlide(5)"></span>
-                    <span class="dot" onclick="currentSlide(6)"></span>
+                    <span class="dot active" onclick="currentSlideNum(1)"></span>
+                    <span class="dot" onclick="currentSlideNum(2)"></span>
+                    <span class="dot" onclick="currentSlideNum(3)"></span>
+                    <span class="dot" onclick="currentSlideNum(4)"></span>
+                    <span class="dot" onclick="currentSlideNum(5)"></span>
+                    <span class="dot" onclick="currentSlideNum(6)"></span>
                 </div>
                 <button id="nextBtn" class="nav-btn" onclick="changeSlide(1)">Next →</button>
             </div>
         </div>
         
-        <!-- Game Controls -->
-        <div class="game-controls">
-            <button id="startGameBtn" class="btn btn-primary" onclick="startGame()" style="display: none;">
-                🎯 Start Linear Equations Challenge
-            </button>
-        </div>
         </div>
 
         <!-- Game Section -->
@@ -688,12 +682,7 @@
             </div>
         </div>
 
-        <!-- Game Controls -->
-        <div id="gameControls" style="display: none; text-align: center; margin: 1rem 0;">
-            <button class="submit-btn" onclick="submitGame()" style="max-width: 300px;">
-                📊 Submit Results
-            </button>
-        </div>
+
 
         <!-- Results Screen -->
         <div id="resultsScreen" class="results-screen">
@@ -792,7 +781,7 @@
             {
                 type: 'text-input',
                 question: 'Solve for x:',
-                equation: 'x/4 = 6',
+                equation: 'x ÷ 4 = 6',
                 correctAnswer: '24',
                 workingHint: 'Multiply both sides by 4',
                 difficulty: 'easy'
@@ -914,7 +903,7 @@
             {
                 type: 'text-input',
                 question: 'Solve for x:',
-                equation: 'x/3 + 5 = 9',
+                equation: 'x ÷ 3 + 5 = 9',
                 correctAnswer: '12',
                 workingHint: 'First subtract 5, then multiply by 3',
                 difficulty: 'medium'
@@ -988,13 +977,14 @@
             document.getElementById('nextBtn').disabled = currentSlide === slides.length;
             
             if (currentSlide === slides.length) {
-                document.getElementById('nextBtn').textContent = 'Start Game →';
+                document.getElementById('nextBtn').textContent = '🎯 Start Game';
+                document.getElementById('nextBtn').disabled = false;
                 document.getElementById('nextBtn').onclick = function() {
-                    document.getElementById('infoSlidesSection').style.display = 'none';
-                    document.getElementById('startGameBtn').style.display = 'block';
+                    startGame();
                 };
             } else {
                 document.getElementById('nextBtn').textContent = 'Next →';
+                document.getElementById('nextBtn').disabled = false;
                 document.getElementById('nextBtn').onclick = function() { changeSlide(1); };
             }
         }
@@ -1053,9 +1043,7 @@
         // Game Logic
         function startGame() {
             document.getElementById('infoSlidesSection').style.display = 'none';
-            document.getElementById('startGameBtn').style.display = 'none';
             document.getElementById('gameSection').style.display = 'block';
-            document.getElementById('gameControls').style.display = 'block';
             
             gameStartTime = new Date();
             initializeGame();
@@ -1173,10 +1161,18 @@
             currentQuestionIndex++;
             
             if (currentQuestionIndex >= questions.length) {
-                // Game completed
-                document.getElementById('gameSection').style.display = 'none';
-                document.getElementById('gameControls').style.display = 'none';
-                calculateAndShowResults();
+                // Game completed - show submit button
+                document.getElementById('nextQuestion').style.display = 'none';
+                document.getElementById('submitAnswer').style.display = 'none';
+                
+                // Create and show submit button
+                const submitBtn = document.createElement('button');
+                submitBtn.className = 'submit-btn';
+                submitBtn.innerHTML = '📊 Submit Results';
+                submitBtn.onclick = submitGame;
+                
+                const questionContainer = document.querySelector('.question-container');
+                questionContainer.appendChild(submitBtn);
             } else {
                 showQuestion();
             }
@@ -1352,7 +1348,6 @@
 
         function showResults(score, timeSpent) {
             document.getElementById('gameSection').style.display = 'none';
-            document.getElementById('gameControls').style.display = 'none';
             
             const resultsScreen = document.getElementById('resultsScreen');
             const percentage = Math.round(score);
@@ -1365,15 +1360,15 @@
             
             let message = '';
             if (percentage >= 90) {
-                message = '🌟 Outstanding! You have mastered linear equations!';
+                message = 'Outstanding! You have mastered linear equations!';
             } else if (percentage >= 80) {
-                message = '🎉 Excellent work! You have a strong understanding of linear equations!';
+                message = 'Excellent work! You have a strong understanding of linear equations!';
             } else if (percentage >= 70) {
-                message = '👍 Good job! Keep practicing to improve your linear equation skills!';
+                message = 'Good job! Keep practicing to improve your linear equation skills!';
             } else if (percentage >= 60) {
-                message = '📚 You\'re getting there! Review the examples and try again!';
+                message = 'You\'re getting there! Review the examples and try again!';
             } else {
-                message = '💪 Keep practicing! Linear equations will become easier with more practice!';
+                message = 'Keep practicing! Linear equations will become easier with more practice!';
             }
             
             document.getElementById('performanceMessage').textContent = message;
