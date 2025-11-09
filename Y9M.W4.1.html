@@ -393,13 +393,32 @@
         </div>
     </div>
 
-    <!-- Header -->
-    <header style="background: var(--dark-blue); color: white; padding: 1rem 0; margin-bottom: 2rem;">
-        <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center;">
-            <h1 style="margin: 0; font-size: 1.8rem;">📐 Linear Equations</h1>
-            <span id="studentInfo" style="font-size: 1rem;"></span>
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <img src="images/jando-edu-logo.png" alt="Jando EDU Logo" class="logo">
+            </div>
+            <div class="header-right">
+                <span id="userGreeting" style="display: none;"></span>
+                <div class="menu-container">
+                    <button id="menuBtn" class="menu-button">☰ Menu</button>
+                    <div id="menuDropdown" class="menu-dropdown">
+                        <a href="index.html" class="menu-item">Home</a>
+                        <a href="learning-hub.html" class="menu-item">Learning Hub</a>
+                        <a href="games.html" class="menu-item">Games</a>
+                        <a href="reward.html" class="menu-item">My Rewards</a>
+                        <button class="menu-logout" onclick="jandoAuth.logout()">Logout</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
+
+    <!-- Game Title Section -->
+    <div style="background: linear-gradient(135deg, var(--orange) 0%, #ff6b35 100%); color: white; padding: 2rem 0; text-align: center; margin-bottom: 2rem;">
+        <h1 style="margin: 0; font-size: 2.5rem; font-weight: bold;">📐 Linear Equations</h1>
+        <p style="margin: 0.5rem 0 0 0; font-size: 1.2rem; opacity: 0.9;">Master solving equations step by step</p>
+    </div>
 
     <div class="game-container">
         <!-- Information Slides -->
@@ -809,6 +828,9 @@
             console.log('Linear Equations game loaded');
             initializeSlides();
             
+            // Initialize menu functionality
+            initializeMenu();
+            
             // Check authentication
             if (!jandoAuth.isAuthenticated()) {
                 document.getElementById('authModal').style.display = 'flex';
@@ -816,6 +838,29 @@
                 updateStudentInfo();
             }
         });
+
+        // Menu functionality
+        function initializeMenu() {
+            const menuBtn = document.getElementById('menuBtn');
+            const menuDropdown = document.getElementById('menuDropdown');
+            
+            if (menuBtn && menuDropdown) {
+                menuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    menuDropdown.style.display = menuDropdown.style.display === 'block' ? 'none' : 'block';
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function() {
+                    menuDropdown.style.display = 'none';
+                });
+                
+                // Prevent menu from closing when clicking inside dropdown
+                menuDropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+        }
 
         // Slide Management
         function initializeSlides() {
@@ -894,7 +939,11 @@
         function updateStudentInfo() {
             const user = jandoAuth.getCurrentUser();
             if (user) {
-                document.getElementById('studentInfo').textContent = `Welcome, ${user.name}!`;
+                const userGreeting = document.getElementById('userGreeting');
+                if (userGreeting) {
+                    userGreeting.textContent = `Welcome, ${user.name}!`;
+                    userGreeting.style.display = 'inline';
+                }
             }
         }
 
