@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linear Equations - JandoEDU</title>
+    <link rel="stylesheet" href="shared-styles.css">
+    <link rel="stylesheet" href="auth-component.css">
+    <link rel="stylesheet" href="loading-component.css">
+    <style>
+        .game-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .info-slides {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            padding: 2rem;
+        }
+
+        .slide {
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        .slide h3 {
+            color: var(--dark-blue);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .slide-content {
+            line-height: 1.6;
+            color: var(--text-color);
+            font-size: 1.1rem;
+        }
+
+        .equation {
+            background: var(--light-blue);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            text-align: center;
+            border-left: 4px solid var(--orange);
+        }
+
+        .example-box {
+            background: #f8f9ff;
+            border: 2px solid var(--light-blue);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .step {
+            margin: 0.5rem 0;
+            padding-left: 1rem;
+        }
+
+        .slide-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 2px solid var(--light-blue);
+        }
+
+        .nav-btn {
+            background: var(--orange);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #e55a00;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-indicator {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ddd;
+            transition: background 0.3s;
+        }
+
+        .dot.active {
+            background: var(--orange);
+        }
+
+        .question-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light-blue);
+        }
+
+        .question-number {
+            background: var(--orange);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .progress-bar {
+            flex: 1;
+            margin: 0 1rem;
+            height: 8px;
+            background: #e0e7ff;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--orange), #ff8c42);
+            transition: width 0.5s ease;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            color: var(--dark-blue);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .equation-display {
+            background: var(--light-blue);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.8rem;
+            text-align: center;
+            border-left: 4px solid var(--orange);
+            color: var(--dark-blue);
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--light-blue);
+            border-radius: 8px;
+            font-size: 1.2rem;
+            margin: 1rem 0;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: var(--orange);
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        }
+
+        .submit-btn {
+            background: var(--orange);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            background: #e55a00;
+            transform: translateY(-2px);
+        }
+
+        .feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .feedback.correct {
+            background: #dcfce7;
+            color: #166534;
+            border: 2px solid #22c55e;
+        }
+
+        .feedback.incorrect {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 2px solid #ef4444;
+        }
+
+        .next-btn {
+            background: var(--dark-blue);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .next-btn:hover {
+            background: #1e3a8a;
+            transform: translateY(-2px);
+        }
+
+        .results-screen {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 2rem;
+            text-align: center;
+            display: none;
+        }
+
+        .score-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--orange);
+            margin: 1rem 0;
+        }
+
+        .performance-message {
+            font-size: 1.2rem;
+            color: var(--dark-blue);
+            margin: 1rem 0;
+        }
+
+        .return-home-btn {
+            background: var(--dark-blue);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .return-home-btn:hover {
+            background: #1e3a8a;
+            transform: translateY(-2px);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .reward-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .reward-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 400px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .reward-animal {
+            font-size: 4rem;
+            margin: 1rem 0;
+            animation: wiggle 2s ease-in-out infinite;
+        }
+
+        .confetti {
+            position: fixed;
+            font-size: 2rem;
+            pointer-events: none;
+            z-index: 999;
+            animation: fall 3s linear forwards;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 10px;
+            }
+            
+            .question-text {
+                font-size: 1.1rem;
+            }
+            
+            .equation-display {
+                font-size: 1.4rem;
+                padding: 1rem;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Auth Modal -->
+    <div id="authModal" class="auth-modal">
+        <div class="auth-modal-content">
+            <div class="auth-header">
+                <h2>🔐 Student Login</h2>
+                <p>Enter your student code to access Linear Equations</p>
+            </div>
+            <div class="auth-form">
+                <input type="text" id="studentCode" placeholder="Enter your student code" maxlength="10">
+                <button onclick="authenticateStudent()" id="loginBtn">Login</button>
+                <div id="authError" class="auth-error"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header style="background: var(--dark-blue); color: white; padding: 1rem 0; margin-bottom: 2rem;">
+        <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center;">
+            <h1 style="margin: 0; font-size: 1.8rem;">📐 Linear Equations</h1>
+            <span id="studentInfo" style="font-size: 1rem;"></span>
+        </div>
+    </header>
+
+    <div class="game-container">
+        <!-- Information Slides -->
+        <div id="infoSection" class="info-slides">
+            <!-- Slide 1: Introduction -->
+            <div class="slide active">
+                <h3>📚 What are Linear Equations?</h3>
+                <div class="slide-content">
+                    <p>Linear equations are mathematical statements where the variable appears only to the first power and is not multiplied or divided by another variable.</p>
+                    
+                    <div class="equation">ax + b = c</div>
+                    
+                    <p><strong>Where:</strong></p>
+                    <ul>
+                        <li><strong>x</strong> is the variable (what we're solving for)</li>
+                        <li><strong>a, b, c</strong> are constants (numbers)</li>
+                    </ul>
+                    
+                    <div class="example-box">
+                        <strong>Examples of Linear Equations:</strong>
+                        <div class="equation">2x + 3 = 11</div>
+                        <div class="equation">x - 5 = 7</div>
+                        <div class="equation">4x = 20</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2: Basic Operations -->
+            <div class="slide">
+                <h3>⚖️ Solving by Addition & Subtraction</h3>
+                <div class="slide-content">
+                    <p>To solve equations, we need to isolate the variable by performing the same operation on both sides.</p>
+                    
+                    <div class="example-box">
+                        <strong>Example: x + 7 = 15</strong>
+                        <div class="step">Subtract 7 from both sides:</div>
+                        <div class="equation">x + 7 - 7 = 15 - 7</div>
+                        <div class="equation">x = 8</div>
+                    </div>
+
+                    <div class="example-box">
+                        <strong>Example: x - 4 = 9</strong>
+                        <div class="step">Add 4 to both sides:</div>
+                        <div class="equation">x - 4 + 4 = 9 + 4</div>
+                        <div class="equation">x = 13</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3: Multiplication & Division -->
+            <div class="slide">
+                <h3>✖️➗ Solving by Multiplication & Division</h3>
+                <div class="slide-content">
+                    <p>When the variable is multiplied or divided by a number, we use the opposite operation.</p>
+                    
+                    <div class="example-box">
+                        <strong>Example: 3x = 18</strong>
+                        <div class="step">Divide both sides by 3:</div>
+                        <div class="equation">3x ÷ 3 = 18 ÷ 3</div>
+                        <div class="equation">x = 6</div>
+                    </div>
+
+                    <div class="example-box">
+                        <strong>Example: x/5 = 4</strong>
+                        <div class="step">Multiply both sides by 5:</div>
+                        <div class="equation">(x/5) × 5 = 4 × 5</div>
+                        <div class="equation">x = 20</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 4: Two-Step Equations -->
+            <div class="slide">
+                <h3>🔢 Two-Step Equations</h3>
+                <div class="slide-content">
+                    <p>For equations with both addition/subtraction AND multiplication/division, solve in reverse order of operations (BODMAS).</p>
+                    
+                    <div class="example-box">
+                        <strong>Example: 2x + 5 = 13</strong>
+                        <div class="step">Step 1: Subtract 5 from both sides</div>
+                        <div class="equation">2x + 5 - 5 = 13 - 5</div>
+                        <div class="equation">2x = 8</div>
+                        <div class="step">Step 2: Divide both sides by 2</div>
+                        <div class="equation">2x ÷ 2 = 8 ÷ 2</div>
+                        <div class="equation">x = 4</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 5: Equations with Brackets -->
+            <div class="slide">
+                <h3>( ) Equations with Brackets</h3>
+                <div class="slide-content">
+                    <p>When brackets are involved, expand them first, then solve as usual.</p>
+                    
+                    <div class="example-box">
+                        <strong>Example: 3(x - 2) = 12</strong>
+                        <div class="step">Step 1: Expand the brackets</div>
+                        <div class="equation">3x - 6 = 12</div>
+                        <div class="step">Step 2: Add 6 to both sides</div>
+                        <div class="equation">3x - 6 + 6 = 12 + 6</div>
+                        <div class="equation">3x = 18</div>
+                        <div class="step">Step 3: Divide by 3</div>
+                        <div class="equation">x = 6</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 6: Variables on Both Sides -->
+            <div class="slide">
+                <h3>↔️ Variables on Both Sides</h3>
+                <div class="slide-content">
+                    <p>When the variable appears on both sides, collect all variables on one side and all numbers on the other.</p>
+                    
+                    <div class="example-box">
+                        <strong>Example: 2x + 3 = x + 7</strong>
+                        <div class="step">Step 1: Subtract x from both sides</div>
+                        <div class="equation">2x - x + 3 = x - x + 7</div>
+                        <div class="equation">x + 3 = 7</div>
+                        <div class="step">Step 2: Subtract 3 from both sides</div>
+                        <div class="equation">x + 3 - 3 = 7 - 3</div>
+                        <div class="equation">x = 4</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide Navigation -->
+            <div class="slide-nav">
+                <button id="prevBtn" class="nav-btn" onclick="changeSlide(-1)" disabled>← Previous</button>
+                <div class="slide-indicator">
+                    <span class="dot active" onclick="currentSlide(1)"></span>
+                    <span class="dot" onclick="currentSlide(2)"></span>
+                    <span class="dot" onclick="currentSlide(3)"></span>
+                    <span class="dot" onclick="currentSlide(4)"></span>
+                    <span class="dot" onclick="currentSlide(5)"></span>
+                    <span class="dot" onclick="currentSlide(6)"></span>
+                </div>
+                <button id="nextBtn" class="nav-btn" onclick="changeSlide(1)">Next →</button>
+            </div>
+        </div>
+
+        <!-- Start Game Button -->
+        <div id="startGameSection" style="text-align: center; margin: 2rem 0;">
+            <button id="startGameBtn" class="submit-btn" onclick="startGame()" style="max-width: 300px;">
+                🎯 Start Linear Equations Challenge
+            </button>
+        </div>
+
+        <!-- Game Section -->
+        <div id="gameSection" style="display: none;">
+            <div class="question-container">
+                <div class="question-header">
+                    <div class="question-number" id="questionNumber">1</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 10%;"></div>
+                    </div>
+                    <div style="color: var(--dark-blue); font-weight: bold;" id="progressText">1 / 10</div>
+                </div>
+
+                <div class="question-text" id="questionText">Loading question...</div>
+                <div class="equation-display" id="equationDisplay"></div>
+                
+                <input type="text" id="answerInput" class="answer-input" placeholder="Enter x = ..." onkeypress="handleKeyPress(event)">
+                
+                <button id="submitAnswer" class="submit-btn" onclick="submitAnswer()">Submit Answer</button>
+                
+                <div id="feedback" class="feedback" style="display: none;"></div>
+                <button id="nextQuestion" class="next-btn" onclick="nextQuestion()" style="display: none;">Next Question</button>
+            </div>
+        </div>
+
+        <!-- Game Controls -->
+        <div id="gameControls" style="display: none; text-align: center; margin: 1rem 0;">
+            <button class="submit-btn" onclick="submitGame()" style="max-width: 300px;">
+                📊 Submit Results
+            </button>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="results-screen">
+            <h2>🎉 Linear Equations Complete!</h2>
+            <div id="firstAttemptScore" class="score-display">0/10</div>
+            <div id="performanceMessage" class="performance-message">Great work on linear equations!</div>
+            <a href="games.html" class="return-home-btn">Return to Games</a>
+        </div>
+
+        <!-- Reward Modal -->
+        <div id="rewardModal" class="reward-modal">
+            <div class="reward-content">
+                <h2>🎉 Congratulations!</h2>
+                <p>You've earned a new animal for scoring 80% or higher!</p>
+                <div id="rewardAnimal" class="reward-animal">🦁</div>
+                <p><strong id="rewardName">Lion</strong></p>
+                <button onclick="closeRewardModal()" class="submit-btn">Awesome!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="auth.js"></script>
+    <script src="loading-component.js"></script>
+    <script>
+        // Game Configuration
+        const gameConfig = {
+            maxQuestions: 10,
+            passingScore: 80,
+            gameId: 'Y9M.W4.1',
+            gameName: 'Linear Equations',
+            sheetName: 'Y9M.W4.1_LinearEquations',
+            responseSheetName: 'Y9M.W4.1_LinearEquations.Responses'
+        };
+
+        console.log('Game Configuration:', gameConfig);
+
+        // Game State
+        let currentQuestionIndex = 0;
+        let questions = [];
+        let userAnswers = [];
+        let currentSlide = 1;
+        let gameStartTime = null;
+        let firstAttemptAnswers = [];
+        let firstAttemptScore = 0;
+
+        // Animal rewards
+        const animals = ['🦁', '🐯', '🐻', '🦊', '🐺', '🦝', '🐨', '🐼', '🦘', '🦒', '🐘', '🦏', '🦛', '🐪', '🦓', '🦌', '🐄', '🐎', '🐖', '🐏'];
+        let currentReward = null;
+
+        // Question Bank
+        const questionBank = [
+            // Basic Addition/Subtraction
+            {
+                type: 'text-input',
+                question: 'Solve for x:',
+                equation: 'x + 7 = 15',
+                correctAnswer: '8',
+                workingHint: 'Subtract 7 from both sides',
+                difficulty: 'easy'
+            },
+            {
+                type: 'text-input',
+                question: 'Solve for x:',
+                equation: 'x - 4 = 9',
+                correctAnswer: '13',
+                workingHint: 'Add 4 to both sides',
+                difficulty: 'easy'
+            },
+            {
+                type: 'text-input',
+                question: 'Solve for x:',
+                equation: 'x + 12 = 20',
+                correctAnswer: '8',
+                workingHint: 'Subtract 12 from both sides',
+                difficulty: 'easy'
+            },
+            
+            // Basic Multiplication/Division
+            {
+                type: 'text-input',
+                question: 'Solve for x:',
+                equation: '3x = 24',
+                correctAnswer: '8',
+                workingHint: 'Divide both sides by 3',
+                difficulty: 'easy'
+            },
+            {
+                type: 'text-input',
+                question: 'Solve for x:',
+                equation: '5x = 35',
+                correctAnswer: '7',
+                workingHint: 'Divide both sides by 5',
+                difficulty: 'easy'
+            },
+            {
+                type: 'text-input',
+                question: 'Solve for x:',
+                equation: 'x/4 = 6',
+                correctAnswer: '24',
+                workingHint: 'Multiply both sides by 4',
+                difficulty: 'easy'
+            },
+
+            // Two-step equations
+            {
+                type: 'text-input',
+                question: 'Solve for x:',
+                equation: '2x + 5 = 13',
+                correctAnswer: '4',
+                workingHint: 'First subtract 5, then divide by 2',
+                difficulty: 'medium'
+            },
+            {
+                type: 'text-input',
+                question: 'Solve for x:',
+                equation: '3x - 7 = 14',
+                correctAnswer: '7',
+                workingHint: 'First add 7, then divide by 3',
+                difficulty: 'medium'
+            },
+            {
+                type: 'text-input',
+                question: 'Solve for x:',
+                equation: '4x + 1 = 17',
+                correctAnswer: '4',
+                workingHint: 'First subtract 1, then divide by 4',
+                difficulty: 'medium'
+            },
+
+            // Equations with brackets
+            {
+                type: 'text-input',
+                question: 'Solve for x:',
+                equation: '2(x + 3) = 14',
+                correctAnswer: '4',
+                workingHint: 'First expand: 2x + 6 = 14, then solve',
+                difficulty: 'medium'
+            },
+            {
+                type: 'text-input',
+                question: 'Solve for x:',
+                equation: '3(x - 2) = 15',
+                correctAnswer: '7',
+                workingHint: 'First expand: 3x - 6 = 15, then solve',
+                difficulty: 'medium'
+            },
+            {
+                type: 'text-input',
+                question: 'Solve for x:',
+                equation: '5(x + 1) = 25',
+                correctAnswer: '4',
+                workingHint: 'First expand: 5x + 5 = 25, then solve',
+                difficulty: 'medium'
+            },
+
+            // Variables on both sides
+            {
+                type: 'text-input',
+                question: 'Solve for x:',
+                equation: '2x + 3 = x + 8',
+                correctAnswer: '5',
+                workingHint: 'Collect variables on one side, numbers on the other',
+                difficulty: 'hard'
+            },
+            {
+                type: 'text-input',
+                question: 'Solve for x:',
+                equation: '3x - 2 = 2x + 5',
+                correctAnswer: '7',
+                workingHint: 'Subtract 2x from both sides, add 2 to both sides',
+                difficulty: 'hard'
+            },
+            {
+                type: 'text-input',
+                question: 'Solve for x:',
+                equation: '4x + 1 = 2x + 11',
+                correctAnswer: '5',
+                workingHint: 'Subtract 2x from both sides, subtract 1 from both sides',
+                difficulty: 'hard'
+            },
+
+            // Word problems
+            {
+                type: 'text-input',
+                question: 'Lisa buys pencils costing $3 each. She spends $21 total. How many pencils did she buy?',
+                equation: '3x = 21',
+                correctAnswer: '7',
+                workingHint: 'Let x = number of pencils. 3x = 21',
+                difficulty: 'medium'
+            },
+            {
+                type: 'text-input',
+                question: 'A number increased by 8 equals 23. What is the number?',
+                equation: 'x + 8 = 23',
+                correctAnswer: '15',
+                workingHint: 'Let x = the number. x + 8 = 23',
+                difficulty: 'easy'
+            },
+            {
+                type: 'text-input',
+                question: 'Three times a number minus 4 equals 17. What is the number?',
+                equation: '3x - 4 = 17',
+                correctAnswer: '7',
+                workingHint: 'Let x = the number. 3x - 4 = 17',
+                difficulty: 'medium'
+            },
+
+            // Challenge problems
+            {
+                type: 'text-input',
+                question: 'Solve for x:',
+                equation: '2(x - 4) = 3(x + 1)',
+                correctAnswer: '-11',
+                workingHint: 'Expand both sides: 2x - 8 = 3x + 3, then solve',
+                difficulty: 'hard'
+            },
+            {
+                type: 'text-input',
+                question: 'Solve for x:',
+                equation: 'x/3 + 5 = 9',
+                correctAnswer: '12',
+                workingHint: 'First subtract 5, then multiply by 3',
+                difficulty: 'medium'
+            }
+        ];
+
+        // Initialize game
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Linear Equations game loaded');
+            initializeSlides();
+            
+            // Check authentication
+            if (!jandoAuth.isAuthenticated()) {
+                document.getElementById('authModal').style.display = 'flex';
+            } else {
+                updateStudentInfo();
+            }
+        });
+
+        // Slide Management
+        function initializeSlides() {
+            showSlide(1);
+        }
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.dot');
+            
+            if (n > slides.length) currentSlide = 1;
+            if (n < 1) currentSlide = slides.length;
+            
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            slides[currentSlide - 1].classList.add('active');
+            dots[currentSlide - 1].classList.add('active');
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = currentSlide === 1;
+            document.getElementById('nextBtn').disabled = currentSlide === slides.length;
+            
+            if (currentSlide === slides.length) {
+                document.getElementById('nextBtn').textContent = 'Start Game →';
+                document.getElementById('nextBtn').onclick = function() {
+                    document.getElementById('infoSection').style.display = 'none';
+                    document.getElementById('startGameSection').style.display = 'block';
+                };
+            } else {
+                document.getElementById('nextBtn').textContent = 'Next →';
+                document.getElementById('nextBtn').onclick = function() { changeSlide(1); };
+            }
+        }
+
+        function changeSlide(n) {
+            currentSlide += n;
+            showSlide(currentSlide);
+        }
+
+        function currentSlideNum(n) {
+            currentSlide = n;
+            showSlide(currentSlide);
+        }
+
+        // Authentication
+        async function authenticateStudent() {
+            const code = document.getElementById('studentCode').value.trim();
+            const errorDiv = document.getElementById('authError');
+            const loginBtn = document.getElementById('loginBtn');
+            
+            if (!code) {
+                errorDiv.textContent = 'Please enter your student code';
+                return;
+            }
+            
+            loginBtn.textContent = 'Logging in...';
+            loginBtn.disabled = true;
+            
+            try {
+                const isValid = await jandoAuth.authenticate(code);
+                if (isValid) {
+                    document.getElementById('authModal').style.display = 'none';
+                    updateStudentInfo();
+                } else {
+                    errorDiv.textContent = 'Invalid student code. Please try again.';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Login failed. Please try again.';
+            }
+            
+            loginBtn.textContent = 'Login';
+            loginBtn.disabled = false;
+        }
+
+        function updateStudentInfo() {
+            const user = jandoAuth.getCurrentUser();
+            if (user) {
+                document.getElementById('studentInfo').textContent = `Welcome, ${user.name}!`;
+            }
+        }
+
+        // Game Logic
+        function startGame() {
+            document.getElementById('infoSection').style.display = 'none';
+            document.getElementById('startGameSection').style.display = 'none';
+            document.getElementById('gameSection').style.display = 'block';
+            document.getElementById('gameControls').style.display = 'block';
+            
+            gameStartTime = new Date();
+            initializeGame();
+            showQuestion();
+        }
+
+        function initializeGame() {
+            // Randomize and select questions
+            const shuffledQuestions = [...questionBank].sort(() => Math.random() - 0.5);
+            questions = shuffledQuestions.slice(0, gameConfig.maxQuestions);
+            
+            userAnswers = new Array(questions.length).fill(null);
+            firstAttemptAnswers = new Array(questions.length).fill(null);
+            currentQuestionIndex = 0;
+            
+            console.log('Game initialized with', questions.length, 'questions');
+        }
+
+        function showQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                return;
+            }
+            
+            const question = questions[currentQuestionIndex];
+            const questionNum = currentQuestionIndex + 1;
+            
+            // Update UI
+            document.getElementById('questionNumber').textContent = questionNum;
+            document.getElementById('progressText').textContent = `${questionNum} / ${questions.length}`;
+            document.getElementById('progressFill').style.width = `${(questionNum / questions.length) * 100}%`;
+            
+            document.getElementById('questionText').textContent = question.question;
+            document.getElementById('equationDisplay').textContent = question.equation;
+            
+            // Reset input and feedback
+            document.getElementById('answerInput').value = '';
+            document.getElementById('answerInput').focus();
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('nextQuestion').style.display = 'none';
+            document.getElementById('submitAnswer').style.display = 'block';
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                if (document.getElementById('nextQuestion').style.display === 'block') {
+                    nextQuestion();
+                } else {
+                    submitAnswer();
+                }
+            }
+        }
+
+        function submitAnswer() {
+            const answer = document.getElementById('answerInput').value.trim();
+            if (!answer) {
+                alert('Please enter an answer');
+                return;
+            }
+            
+            const currentQuestion = questions[currentQuestionIndex];
+            const isFirstAttempt = firstAttemptAnswers[currentQuestionIndex] === null;
+            
+            // Store first attempt
+            if (isFirstAttempt) {
+                firstAttemptAnswers[currentQuestionIndex] = answer;
+            }
+            
+            // Store current answer
+            userAnswers[currentQuestionIndex] = answer;
+            
+            // Check correctness
+            const isCorrect = checkAnswerCorrectness(currentQuestion, answer);
+            
+            // Show feedback
+            const feedbackDiv = document.getElementById('feedback');
+            feedbackDiv.style.display = 'block';
+            
+            if (isCorrect) {
+                feedbackDiv.className = 'feedback correct';
+                feedbackDiv.innerHTML = `
+                    <div>✅ Correct! x = ${currentQuestion.correctAnswer}</div>
+                    <div style="font-size: 0.9rem; margin-top: 0.5rem; font-weight: normal;">
+                        ${currentQuestion.workingHint}
+                    </div>
+                `;
+            } else {
+                feedbackDiv.className = 'feedback incorrect';
+                feedbackDiv.innerHTML = `
+                    <div>❌ Not quite right. The correct answer is x = ${currentQuestion.correctAnswer}</div>
+                    <div style="font-size: 0.9rem; margin-top: 0.5rem; font-weight: normal;">
+                        Hint: ${currentQuestion.workingHint}
+                    </div>
+                `;
+            }
+            
+            // Show next button
+            document.getElementById('submitAnswer').style.display = 'none';
+            document.getElementById('nextQuestion').style.display = 'block';
+            document.getElementById('nextQuestion').focus();
+        }
+
+        function checkAnswerCorrectness(question, userAnswer) {
+            const correctAnswer = question.correctAnswer.toString().toLowerCase().trim();
+            const userAnswerClean = userAnswer.toString().toLowerCase().trim();
+            
+            // Handle different formats (x=5, 5, etc.)
+            const cleanedUserAnswer = userAnswerClean.replace(/x\s*=\s*/, '').replace(/\s+/g, '');
+            const cleanedCorrectAnswer = correctAnswer.replace(/x\s*=\s*/, '').replace(/\s+/g, '');
+            
+            return cleanedUserAnswer === cleanedCorrectAnswer;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex >= questions.length) {
+                // Game completed
+                document.getElementById('gameSection').style.display = 'none';
+                document.getElementById('gameControls').style.display = 'none';
+                calculateAndShowResults();
+            } else {
+                showQuestion();
+            }
+        }
+
+        function calculateScore() {
+            let correct = 0;
+            for (let i = 0; i < questions.length; i++) {
+                if (checkAnswerCorrectness(questions[i], firstAttemptAnswers[i])) {
+                    correct++;
+                }
+            }
+            return Math.round((correct / questions.length) * 100);
+        }
+
+        function calculateAndShowResults() {
+            firstAttemptScore = calculateScore();
+            showResults(firstAttemptScore, 0);
+        }
+
+        async function submitGame() {
+            if (!jandoAuth.isAuthenticated()) {
+                alert('Please log in first');
+                return;
+            }
+            
+            // Show loading
+            jandoLoading.show();
+            
+            const finalScore = calculateScore();
+            const gameEndTime = new Date();
+            const totalTimeSpent = Math.round((gameEndTime - gameStartTime) / 1000);
+            
+            console.log('Submitting game with score:', finalScore);
+            console.log('Total time spent:', totalTimeSpent, 'seconds');
+            console.log('Questions answered:', userAnswers.filter(a => a !== null && a !== undefined).length, 'of', questions.length);
+            
+            try {
+                // Save to Google Sheets first
+                await saveGameResults(finalScore, totalTimeSpent);
+            } catch (error) {
+                console.error('Error in saveGameResults:', error);
+            } finally {
+                // Always complete loading, regardless of success or failure
+                jandoLoading.complete();
+                setTimeout(() => jandoLoading.hide(), 600);
+                
+                // Show results after a brief delay
+                setTimeout(() => {
+                    showResults(finalScore, totalTimeSpent);
+                }, 500);
+            }
+        }
+
+        async function saveGameResults(finalScore, timeSpent) {
+            if (!jandoAuth.isAuthenticated()) {
+                console.log('User not authenticated, skipping save');
+                return;
+            }
+
+            const user = jandoAuth.getCurrentUser();
+            
+            // Calculate correct answers count
+            const correctCount = Math.round((finalScore / 100) * questions.length);
+            
+            const gameData = {
+                code: user.code,
+                game: 'Y9M.W4.1 - Linear Equations',
+                score: Number(correctCount), // Ensure it's a number
+                totalQuestions: Number(questions.length), // Ensure it's a number
+                sheet: 'Y9M.W4.1_LinearEquations',
+                responses: userAnswers.map((answer, index) => {
+                    const question = questions[index];
+                    const correctAnswer = question.correctAnswer;
+                    
+                    return {
+                        question: question.equation,
+                        correct: correctAnswer,
+                        answer: answer
+                    };
+                })
+            };
+            
+            console.log('=== DEBUGGING GAME SUBMISSION ===');
+            console.log('Final Score:', finalScore);
+            console.log('Questions Length:', questions.length);
+            console.log('Correct Count:', correctCount);
+            console.log('User Answers:', userAnswers);
+            console.log('Sending game data:', JSON.stringify(gameData, null, 2));
+
+            try {
+                // Create timeout promise
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Request timeout')), 10000)
+                );
+                
+                // Create fetch promise
+                const fetchPromise = fetch('https://script.google.com/macros/s/AKfycbzwNZGb_nRFF9t4lLdJdbII1kuDKhsiy4_liBxOe3pNc6rWP7swfem33C_ALT3OWQ9GoQ/exec', {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(gameData)
+                });
+
+                // Race between fetch and timeout
+                const response = await Promise.race([fetchPromise, timeoutPromise]);
+                console.log('✅ Game results fetch completed');
+                
+                // Test connection to verify the endpoint is working
+                console.log('🔍 Testing connection...');
+                const testResponse = await fetch('https://script.google.com/macros/s/AKfycbzwNZGb_nRFF9t4lLdJdbII1kuDKhsiy4_liBxOe3pNc6rWP7swfem33C_ALT3OWQ9GoQ/exec?test=connection');
+                const testResult = await testResponse.json();
+                console.log('🔍 Connection test result:', testResult);
+
+                console.log('Game results sent to Google Sheets');
+                
+                // Award reward if score is 80% or higher
+                if (correctCount >= (questions.length * 0.8)) {
+                    console.log('Score qualifies for reward, processing...');
+                    await awardReward(user.code);
+                }
+
+            } catch (error) {
+                console.error('❌ Error saving game results:', error);
+                console.log('Continuing with local results display...');
+            }
+        }
+
+        // Award reward function
+        async function awardReward(studentCode) {
+            try {
+                // Get a random animal reward
+                const randomAnimal = animals[Math.floor(Math.random() * animals.length)];
+                
+                // Send reward to Google Sheets
+                const rewardData = {
+                    code: studentCode,
+                    reward: randomAnimal
+                };
+                
+                // Create timeout promise
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Reward request timeout')), 5000)
+                );
+                
+                // Create fetch promise
+                const fetchPromise = fetch('https://script.google.com/macros/s/AKfycbzwNZGb_nRFF9t4lLdJdbII1kuDKhsiy4_liBxOe3pNc6rWP7swfem33C_ALT3OWQ9GoQ/exec', {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(rewardData)
+                });
+
+                // Race between fetch and timeout
+                const response = await Promise.race([fetchPromise, timeoutPromise]);
+                
+                console.log('Reward sent to Google Sheets');
+                currentReward = randomAnimal;
+                console.log('🎁 Reward earned:', currentReward);
+                
+            } catch (error) {
+                console.error('Error awarding reward:', error);
+                // Continue with local reward anyway
+                const randomAnimal = animals[Math.floor(Math.random() * animals.length)];
+                currentReward = randomAnimal;
+                console.log('🎁 Local reward assigned:', currentReward);
+            }
+        }
+
+        function showResults(score, timeSpent) {
+            document.getElementById('gameSection').style.display = 'none';
+            document.getElementById('gameControls').style.display = 'none';
+            
+            const resultsScreen = document.getElementById('resultsScreen');
+            const percentage = Math.round(score);
+            const correct = Math.round((score / 100) * questions.length);
+            
+            document.getElementById('firstAttemptScore').innerHTML = `
+                <div style="font-size: 1.2rem; color: var(--dark-blue); margin-bottom: 0.5rem;">Your Score</div>
+                <div style="font-size: 2.5rem; color: var(--orange); font-weight: bold;">${correct}/${questions.length}</div>
+            `;
+            
+            let message = '';
+            if (percentage >= 90) {
+                message = '🌟 Outstanding! You have mastered linear equations!';
+            } else if (percentage >= 80) {
+                message = '🎉 Excellent work! You have a strong understanding of linear equations!';
+            } else if (percentage >= 70) {
+                message = '👍 Good job! Keep practicing to improve your linear equation skills!';
+            } else if (percentage >= 60) {
+                message = '📚 You\'re getting there! Review the examples and try again!';
+            } else {
+                message = '💪 Keep practicing! Linear equations will become easier with more practice!';
+            }
+            
+            document.getElementById('performanceMessage').textContent = message;
+            resultsScreen.style.display = 'block';
+            
+            // Show reward if earned
+            if (currentReward && percentage >= 80) {
+                setTimeout(() => showRewardModal(), 1000);
+            }
+        }
+
+        function giveReward() {
+            if (currentReward) {
+                setTimeout(() => showRewardModal(), 1000);
+                return;
+            }
+
+            // Fallback: fetch rewards from Google Sheets if currentReward is not set
+            const user = jandoAuth.getCurrentUser();
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbzwNZGb_nRFF9t4lLdJdbII1kuDKhsiy4_liBxOe3pNc6rWP7swfem33C_ALT3OWQ9GoQ/exec';
+            
+            fetch(scriptURL + "?rewards=" + encodeURIComponent(user.code))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.rewards && data.rewards.length > 0) {
+                        currentReward = data.rewards[data.rewards.length - 1]; // Get the latest reward
+                        setTimeout(() => showRewardModal(), 1000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching rewards:', error);
+                });
+        }
+
+        function revealReward() {
+            document.getElementById('rewardAnimal').textContent = currentReward;
+            document.getElementById('rewardName').textContent = getAnimalName(currentReward);
+        }
+
+        function showRewardModal() {
+            const modal = document.getElementById('rewardModal');
+            revealReward();
+            modal.style.display = 'flex';
+            createConfetti();
+        }
+
+        function closeRewardModal() {
+            document.getElementById('rewardModal').style.display = 'none';
+            showReturnHomeButton();
+        }
+
+        function showReturnHomeButton() {
+            // Button is already visible in results screen
+        }
+
+        function getAnimalName(emoji) {
+            const animalNames = {
+                '🦁': 'Lion', '🐯': 'Tiger', '🐻': 'Bear', '🦊': 'Fox', '🐺': 'Wolf',
+                '🦝': 'Raccoon', '🐨': 'Koala', '🐼': 'Panda', '🦘': 'Kangaroo', '🦒': 'Giraffe',
+                '🐘': 'Elephant', '🦏': 'Rhino', '🦛': 'Hippo', '🐪': 'Camel', '🦓': 'Zebra',
+                '🦌': 'Deer', '🐄': 'Cow', '🐎': 'Horse', '🐖': 'Pig', '🐏': 'Ram'
+            };
+            return animalNames[emoji] || 'Amazing Animal';
+        }
+
+        function createConfetti() {
+            const colors = ['🎉', '🎊', '⭐', '✨', '🌟'];
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.textContent = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 4000);
+                }, i * 100);
+            }
+        }
+    </script>
+</body>
+</html>
