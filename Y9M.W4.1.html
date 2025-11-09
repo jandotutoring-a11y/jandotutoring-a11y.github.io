@@ -9,9 +9,31 @@
     <link rel="stylesheet" href="loading-component.css">
     <style>
         .game-container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 2rem;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, var(--orange) 0%, var(--secondary-orange-dark) 100%);
+            color: var(--white);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .game-header h1 {
+            font-size: 2.5rem;
+            margin: 0 0 0.5rem 0;
+            font-weight: var(--font-weight-bold);
+        }
+
+        .game-header p {
+            font-size: 1.1rem;
+            margin: 0;
+            opacity: 0.9;
         }
 
         .info-slides {
@@ -79,26 +101,93 @@
             border-top: 2px solid var(--light-blue);
         }
 
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: var(--font-weight-bold);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--orange);
+            color: var(--white);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--secondary-orange-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--dark-blue);
+            color: var(--white);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--secondary-blue-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background: var(--gray-400);
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .nav-btn {
             background: var(--orange);
             color: white;
             border: none;
             padding: 0.8rem 1.5rem;
-            border-radius: 25px;
+            border-radius: 0.5rem;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: var(--font-weight-bold);
             transition: all 0.3s;
         }
 
         .nav-btn:hover {
-            background: #e55a00;
-            transform: translateY(-2px);
+            background: var(--secondary-orange-dark);
+            transform: translateY(-1px);
         }
 
         .nav-btn:disabled {
-            background: #ccc;
+            background: var(--gray-400);
             cursor: not-allowed;
             transform: none;
+        }
+
+        .game-progress {
+            background: var(--white);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            text-align: center;
+            border: 1px solid var(--gray-300);
+        }
+
+        .progress-bar {
+            background: var(--gray-200);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, var(--orange) 0%, var(--light-blue) 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
         }
 
         .slide-indicator {
@@ -204,9 +293,9 @@
             color: white;
             border: none;
             padding: 1rem 2rem;
-            border-radius: 25px;
+            border-radius: 0.5rem;
             font-size: 1.1rem;
-            font-weight: bold;
+            font-weight: var(--font-weight-bold);
             cursor: pointer;
             transition: all 0.3s;
             width: 100%;
@@ -214,8 +303,8 @@
         }
 
         .submit-btn:hover {
-            background: #e55a00;
-            transform: translateY(-2px);
+            background: var(--secondary-orange-dark);
+            transform: translateY(-1px);
         }
 
         .feedback {
@@ -243,17 +332,17 @@
             color: white;
             border: none;
             padding: 1rem 2rem;
-            border-radius: 25px;
+            border-radius: 0.5rem;
             font-size: 1.1rem;
-            font-weight: bold;
+            font-weight: var(--font-weight-bold);
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 1rem;
         }
 
         .next-btn:hover {
-            background: #1e3a8a;
-            transform: translateY(-2px);
+            background: var(--secondary-blue-dark);
+            transform: translateY(-1px);
         }
 
         .results-screen {
@@ -283,9 +372,9 @@
             color: white;
             border: none;
             padding: 1rem 2rem;
-            border-radius: 25px;
+            border-radius: 0.5rem;
             font-size: 1.1rem;
-            font-weight: bold;
+            font-weight: var(--font-weight-bold);
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
@@ -294,8 +383,8 @@
         }
 
         .return-home-btn:hover {
-            background: #1e3a8a;
-            transform: translateY(-2px);
+            background: var(--secondary-blue-dark);
+            transform: translateY(-1px);
         }
 
         @keyframes slideIn {
@@ -414,15 +503,23 @@
         </div>
     </header>
 
-    <!-- Game Title Section -->
-    <div style="background: linear-gradient(135deg, var(--orange) 0%, #ff6b35 100%); color: white; padding: 2rem 0; text-align: center; margin-bottom: 2rem;">
-        <h1 style="margin: 0; font-size: 2.5rem; font-weight: bold;">📐 Linear Equations</h1>
-        <p style="margin: 0.5rem 0 0 0; font-size: 1.2rem; opacity: 0.9;">Master solving equations step by step</p>
-    </div>
-
     <div class="game-container">
-        <!-- Information Slides -->
-        <div id="infoSection" class="info-slides">
+        <div class="game-header">
+            <h1>📐 Linear Equations</h1>
+            <p>Master solving equations step by step</p>
+        </div>
+        <!-- Information Slides Section -->
+        <div id="infoSlidesSection" style="display: block;">
+            <div class="game-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="infoProgressFill" style="width: 16.67%;"></div>
+                </div>
+                <p style="text-align: center; color: var(--dark-blue); font-weight: var(--font-weight-medium); margin: 0.5rem 0;">
+                    Information Slide <span id="infoSlideNumber">1</span> of 6
+                </p>
+            </div>
+            
+            <div id="infoSection" class="info-slides">
             <!-- Slide 1: Introduction -->
             <div class="slide active">
                 <h3>📚 What are Linear Equations?</h3>
@@ -559,12 +656,13 @@
                 <button id="nextBtn" class="nav-btn" onclick="changeSlide(1)">Next →</button>
             </div>
         </div>
-
-        <!-- Start Game Button -->
-        <div id="startGameSection" style="text-align: center; margin: 2rem 0;">
-            <button id="startGameBtn" class="submit-btn" onclick="startGame()" style="max-width: 300px;">
+        
+        <!-- Game Controls -->
+        <div class="game-controls">
+            <button id="startGameBtn" class="btn btn-primary" onclick="startGame()" style="display: none;">
                 🎯 Start Linear Equations Challenge
             </button>
+        </div>
         </div>
 
         <!-- Game Section -->
@@ -880,6 +978,11 @@
             slides[currentSlide - 1].classList.add('active');
             dots[currentSlide - 1].classList.add('active');
             
+            // Update progress bar
+            const progressPercentage = (currentSlide / slides.length) * 100;
+            document.getElementById('infoProgressFill').style.width = progressPercentage + '%';
+            document.getElementById('infoSlideNumber').textContent = currentSlide;
+            
             // Update navigation buttons
             document.getElementById('prevBtn').disabled = currentSlide === 1;
             document.getElementById('nextBtn').disabled = currentSlide === slides.length;
@@ -887,8 +990,8 @@
             if (currentSlide === slides.length) {
                 document.getElementById('nextBtn').textContent = 'Start Game →';
                 document.getElementById('nextBtn').onclick = function() {
-                    document.getElementById('infoSection').style.display = 'none';
-                    document.getElementById('startGameSection').style.display = 'block';
+                    document.getElementById('infoSlidesSection').style.display = 'none';
+                    document.getElementById('startGameBtn').style.display = 'block';
                 };
             } else {
                 document.getElementById('nextBtn').textContent = 'Next →';
@@ -949,8 +1052,8 @@
 
         // Game Logic
         function startGame() {
-            document.getElementById('infoSection').style.display = 'none';
-            document.getElementById('startGameSection').style.display = 'none';
+            document.getElementById('infoSlidesSection').style.display = 'none';
+            document.getElementById('startGameBtn').style.display = 'none';
             document.getElementById('gameSection').style.display = 'block';
             document.getElementById('gameControls').style.display = 'block';
             
