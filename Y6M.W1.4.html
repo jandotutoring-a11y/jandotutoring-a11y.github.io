@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Y6M.W1.4 – Year 6 Place Value & Comparison</title>
+  <link rel="stylesheet" href="shared-styles.css">
+  <link rel="stylesheet" href="loading-component.css">
+  <link rel="stylesheet" href="auth-component.css">
+  <style>
+    /* ONLY game-specific styles - NO header/footer/auth styles */
+    .feedback-msg {
+      display: none;
+      margin-top: 18px;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 18px;
+      color: var(--dark-blue);
+      background: #f7faff;
+      border: 3px solid transparent;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .feedback-msg.correct {
+      border-color: #32CD32;
+      background: #eafbe7;
+    }
+    .feedback-msg.incorrect {
+      border-color: #E15C31;
+      background: #ffeae7;
+    }
+
+    .container {
+      min-height: auto;
+      height: auto;
+      overflow: visible;
+    }
+
+    #startBtn:hover {
+      background: #d14a1f;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(225, 92, 49, 0.3);
+    }
+
+    #gameArea {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: var(--white);
+      border-radius: 1rem;
+      box-shadow: var(--shadow-lg);
+      min-height: auto;
+      height: auto;
+    }
+
+    .question-text {
+      text-align: center;
+      font-size: 1.4rem;
+      color: var(--dark-blue);
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: var(--light-blue);
+      border-radius: 0.5rem;
+    }
+
+    #submitBtn, #nextBtn {
+      margin: 1.5rem auto;
+      display: block;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: var(--orange);
+      color: white;
+      font-weight: 600;
+    }
+
+    #submitBtn:hover, #nextBtn:enabled:hover {
+      background: #d14a1f;
+      transform: translateY(-2px);
+    }
+
+    #nextBtn:disabled {
+      background: var(--gray-400);
+      color: var(--gray-600);
+      cursor: not-allowed;
+    }
+
+    #nextBtn:enabled {
+      background: var(--orange);
+      color: white;
+      cursor: pointer;
+    }
+
+    #progress {
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: var(--gray-50);
+      border-radius: 0.5rem;
+      text-align: center;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <!-- Authentication Modal -->
+  <div id="authModal">
+    <div id="authModalContent">
+      <div class="auth-header">
+        <img src="images/jando-edu-logo.png" alt="Jando EDU Logo" class="auth-logo">
+        <h2>Welcome to Jando EDU!</h2>
+        <p>Login to start your quiz</p>
+      </div>
+      
+      <div class="auth-body">
+        <div class="auth-input-group">
+          <label class="auth-input-label" for="studentCodeInput">Student Access Code</label>
+          <input type="text" id="studentCodeInput" placeholder="Enter your unique student code" maxlength="20">
+        </div>
+        
+        <div id="authError" style="display: none;"></div>
+        
+        <button id="authLoginBtn" onclick="jandoAuth.authenticateUser()">
+          Login
+        </button>
+      </div>
+
+      <div class="auth-features">
+        <h3>What's waiting for you with Jando EDU:</h3>
+        <ul class="auth-feature-list">
+          <li>
+            <div class="auth-feature-icon">🎮</div>
+            Interactive games and quizzes
+          </li>
+          <li>
+            <div class="auth-feature-icon">📚</div>
+            Personalised learning modules
+          </li>
+          <li>
+            <div class="auth-feature-icon">🏆</div>
+            Collect rewards and track progress
+          </li>
+          <li>
+            <div class="auth-feature-icon">📊</div>
+            Real-time performance insights
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <img src="images/jando-edu-logo.png" alt="Jando EDU Logo" class="logo">
+      </div>
+      <div class="header-right">
+        <span id="userGreeting" style="display: none;"></span>
+        <div class="menu-container">
+          <button id="menuBtn" class="menu-button">☰ Menu</button>
+          <div id="menuDropdown" class="menu-dropdown">
+            <a href="index.html" class="menu-item">Home</a>
+            <a href="learning-hub.html" class="menu-item">Learning Hub</a>
+            <a href="games.html" class="menu-item">Games</a>
+            <a href="reward.html" class="menu-item">My Rewards</a>
+            <button class="menu-logout" onclick="jandoAuth.logout()">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div id="loading" style="display: none;">
+      <img src="https://i.imgur.com/KpZ3dFx.gif" alt="Loading...">
+      <span>Loading, please wait...</span>
+    </div>
+
+    <!-- Instructions Section -->
+    <div id="instructionsArea" style="text-align: center; max-width: 600px; margin: 2rem auto;">
+      <h2 id="greeting" style="color: var(--dark-blue); margin-bottom: 1.5rem;"></h2>
+      <div style="background: var(--white); padding: 2rem; border-radius: 1rem; box-shadow: var(--shadow-lg); margin-bottom: 2rem;">
+        <h3 style="color: var(--orange); margin-bottom: 1rem;">🔢 Year 6 Place Value & Comparison</h3>
+        <ul style="text-align: left; color: var(--dark-blue); font-size: 1.1rem; line-height: 1.6;">
+          <li>Read each question carefully.</li>
+          <li>Type your answer in the box and click "Submit Answer".</li>
+          <li>Press the Mark as complete button at the bottom when the quiz is completed, then continue with the module.</li>
+        </ul>
+      </div>
+      <button id="startBtn" onclick="startCountdown()" style="
+        background: var(--orange);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      ">Start Quiz</button>
+    </div>
+
+    <div id="countdown" style="display: none;"></div>
+
+    <div id="gameArea" style="display: none;">
+      <div id="progress"></div>
+      <div class="question-text" id="question"></div>
+      
+      <div style="text-align: center; margin: 1rem 0;">
+        <input id="answerInput" type="text" placeholder="Type your answer here" style="padding: 0.8rem; font-size: 1.1rem; width: 60%; border-radius: 6px; border: 2px solid var(--gray-200);">
+      </div>
+
+      <div id="choiceButtons" style="text-align:center; margin: 1rem 0; display:none;">
+        <button class="play-button" id="choiceBtn1" style="margin:0.5rem; min-width:140px;" onclick="selectChoice(this)"></button>
+        <button class="play-button" id="choiceBtn2" style="margin:0.5rem; min-width:140px;" onclick="selectChoice(this)"></button>
+      </div>
+      
+      <button id="submitBtn" onclick="submitAnswer()">Submit Answer</button>
+      <button id="nextBtn" onclick="nextQuestion()" style="display: none;" disabled>Next</button>
+      <div id="feedback" class="feedback-msg"></div>
+    </div>
+
+    <div id="result" style="text-align: center; margin: 2rem 0; font-size: 1.2rem;"></div>
+    <div id="uploadStatus" style="text-align: center; margin: 1rem 0;"></div>
+  </div>
+
+
+
+  <!-- Loading Modal -->
+  <div id="loadingModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 1rem; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+      <img src="https://i.imgur.com/KpZ3dFx.gif" alt="Loading..." style="width: 60px; height: 60px; margin-bottom: 1rem;">
+      <h3 style="color: var(--dark-blue); margin-bottom: 0.5rem;">Uploading Results...</h3>
+      <p style="color: var(--gray-600); font-size: 0.9rem;">Please wait while we save your progress</p>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2025 Jando EDU. All rights reserved. | <a href="https://www.jandotutoring.com/privacy-policy" target="_blank">Privacy Policy</a> | <a href="https://www.jandotutoring.com/contact-us" target="_blank">Contact</a></p>
+    </div>
+  </footer>
+
+  <script src="auth.js"></script>
+  <script>
+    // Game variables (adjusted for fixed questions)
+    let code, studentName;
+    let currentQuestion = -1;
+    let score = 0;
+    let responses = [];
+    let fixedQuestions = [
+      { q: "What digit is in the ten-thousands place in 583,214?", a: "8" },
+      { q: "Which is larger: 405,090 or 450,090?", a: "450090", choices: ["405090","450090"] },
+      { q: "True or false: In 6,012, the 6 means six hundred.", a: "false", choices: ["true","false"] }
+    ];
+    let totalQuestions = fixedQuestions.length;
+    let gameName = "Y6M.W1.4 - Year 6 Place Value & Comparison";
+    let sheetName = "Y6M.W1.4";
+
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzwNZGb_nRFF9t4lLdJdbII1kuDKhsiy4_liBxOe3pNc6rWP7swfem33C_ALT3OWQ9GoQ/exec";
+    const animals = ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🐔","🐧","🐦","🐤","🐣","🐺","🦉","🦅","🦆","🐴","🦄","🐝","🐛","🦋","🐌","🐞","🐜","🦗","🕷️","🦂","🐢","🐍","🦎","🐙","🦑","🦐","🦀","🐡","🐠","🐟","🐬","🐳","🐋","🦈","🐊","🐅","🐆","🦓","🦏","🐘","🦒","🦘","🐪","🐫","🦙","🐑","🐐","🐎","🐖","🐄","🐃","🐂","🐏","🦌","🐕","🐩","🐈","🐓","🦃","🕊️","🐇","🐁","🐀"];
+    let currentReward = "";
+
+    function startGame() {
+      document.getElementById("greeting").innerText = `Hi, ${studentName}!`;
+      document.getElementById("instructionsArea").style.display = "block";
+      document.getElementById("countdown").style.display = "none";
+      document.getElementById("gameArea").style.display = "none";
+      document.getElementById("result").innerText = "";
+      document.getElementById("uploadStatus").innerText = "";
+      currentQuestion = -1;
+      score = 0;
+      responses = [];
+      document.getElementById("answerInput").value = "";
+    }
+
+    function startCountdown() {
+      // Skip countdown: immediately hide instructions and start the quiz
+      document.getElementById("instructionsArea").style.display = "none";
+      const countdownDiv = document.getElementById("countdown");
+      if (countdownDiv) countdownDiv.style.display = "none";
+      document.getElementById("gameArea").style.display = "block";
+      nextQuestion();
+    }
+
+    function submitAnswer() {
+      if (currentQuestion < 0) return;
+      // For text-input questions only; choice questions use selectChoice()
+      const question = fixedQuestions[currentQuestion];
+      if (question.choices) return; // ignore submit for choice questions
+
+      const raw = document.getElementById("answerInput").value.trim();
+      if (!raw) {
+        showFeedback("Please type an answer before submitting.", "incorrect");
+        return;
+      }
+
+      const expected = question.a;
+      const normalizedStudent = normalizeAnswer(raw);
+      const normalizedExpected = normalizeAnswer(expected);
+      const correct = normalizedStudent === normalizedExpected;
+
+      responses.push({ question: question.q, correct: question.a, answer: raw });
+
+      document.getElementById("submitBtn").style.display = "none";
+
+      if (correct) {
+        score++;
+        showFeedback("Correct! Good job.", "correct");
+        document.getElementById("nextBtn").style.display = "block";
+        document.getElementById("nextBtn").disabled = false;
+      } else {
+        showFeedback(`Not quite right. You answered ${raw} but needed ${question.a}.`, "incorrect");
+        document.getElementById("nextBtn").style.display = "block";
+        document.getElementById("nextBtn").disabled = false;
+      }
+    }
+
+    function selectChoice(btn) {
+      if (currentQuestion < 0) return;
+      const choice = btn.dataset.value || btn.innerText.replace(/,/g,'').toLowerCase();
+      const question = fixedQuestions[currentQuestion];
+      const expected = question.a;
+      const normalizedStudent = normalizeAnswer(choice);
+      const normalizedExpected = normalizeAnswer(expected);
+      const correct = normalizedStudent === normalizedExpected;
+
+      responses.push({ question: question.q, correct: question.a, answer: btn.innerText });
+
+      document.getElementById("choiceButtons").style.display = "none";
+      document.getElementById("submitBtn").style.display = "none";
+
+      if (correct) {
+        score++;
+        showFeedback("Correct!", "correct");
+      } else {
+        showFeedback(`Not quite right. You selected ${btn.innerText} but needed ${question.a.replace(/,/g,'')}.`, "incorrect");
+      }
+
+      document.getElementById("nextBtn").style.display = "block";
+      document.getElementById("nextBtn").disabled = false;
+    }
+
+    function normalizeAnswer(input) {
+      if (typeof input !== 'string') return String(input).toLowerCase();
+      const trimmed = input.trim();
+      // If input looks like a number, remove commas
+      if (/^[0-9,]+$/.test(trimmed)) {
+        return trimmed.replace(/,/g, '');
+      }
+      // Normalize true/false answers
+      const lowered = trimmed.toLowerCase();
+      if (lowered === 'true' || lowered === 't' || lowered === 'yes' || lowered === 'y') return 'true';
+      if (lowered === 'false' || lowered === 'f' || lowered === 'no' || lowered === 'n') return 'false';
+      // For single digits, just return the digit
+      return lowered;
+    }
+
+    function nextQuestion() {
+      document.getElementById("feedback").style.display = "none";
+      document.getElementById("nextBtn").style.display = "none";
+      document.getElementById("nextBtn").disabled = true;
+      document.getElementById("submitBtn").style.display = "block";
+      document.getElementById("answerInput").value = "";
+      document.getElementById("choiceButtons").style.display = "none";
+
+      currentQuestion++;
+      if (currentQuestion >= totalQuestions) {
+        endGame();
+        return;
+      }
+
+      const question = fixedQuestions[currentQuestion];
+      document.getElementById("question").innerText = question.q;
+      document.getElementById("progress").innerText = `Question ${currentQuestion + 1} of ${totalQuestions}`;
+      showFeedback("", "");
+
+      // If this question provides choices, show choice buttons instead of free input
+      if (question.choices && Array.isArray(question.choices) && question.choices.length >= 2) {
+        const btn1 = document.getElementById('choiceBtn1');
+        const btn2 = document.getElementById('choiceBtn2');
+        btn1.innerText = formatChoiceLabel(question.choices[0]);
+        btn1.dataset.value = question.choices[0];
+        btn2.innerText = formatChoiceLabel(question.choices[1]);
+        btn2.dataset.value = question.choices[1];
+        document.getElementById('answerInput').style.display = 'none';
+        document.getElementById('choiceButtons').style.display = 'block';
+        document.getElementById('submitBtn').style.display = 'none';
+      } else {
+        document.getElementById('answerInput').style.display = 'inline-block';
+        document.getElementById('choiceButtons').style.display = 'none';
+        document.getElementById('submitBtn').style.display = 'block';
+      }
+    }
+
+    function formatChoiceLabel(val) {
+      // Add commas for large numeric choices for display if digits only
+      if (/^[0-9]+$/.test(val)) {
+        return val.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+      return val.charAt(0).toUpperCase() + val.slice(1);
+    }
+
+    function showFeedback(message, type) {
+      const feedback = document.getElementById("feedback");
+      feedback.innerText = message;
+      feedback.className = "feedback-msg " + type;
+      feedback.style.display = message ? "block" : "none";
+    }
+
+    function endGame() {
+      document.getElementById("gameArea").style.display = "none";
+      document.getElementById("result").innerHTML = `
+        <div style="font-size:1.2rem; color:var(--dark-blue);">Game Over. You scored ${score} out of ${totalQuestions}.</div>
+        <div id="completeMsg" style="margin-top:1rem; font-size:1.5rem; font-weight:700; color:var(--orange);">Press on 'Mark as Complete' below then continue.</div>
+      `;
+
+      document.getElementById("loadingModal").style.display = "block";
+
+      const payload = {
+        code: code,
+        score: score,
+        game: gameName,
+        sheet: sheetName,
+        responses: responses
+      };
+
+      fetch(scriptURL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(() => {
+        document.getElementById("loadingModal").style.display = "none";
+        document.getElementById("uploadStatus").style.color = "green";
+        document.getElementById("uploadStatus").innerText = "Results submitted successfully.";
+        setTimeout(() => {
+          if (score / totalQuestions >= 0.8) { 
+            giveReward(); 
+          } else {
+            showReturnHomeButton();
+          }
+        }, 500);
+      })
+      .catch(() => {
+        document.getElementById("loadingModal").style.display = "none";
+        document.getElementById("uploadStatus").style.color = "red";
+        document.getElementById("uploadStatus").innerText = "Could not submit results.";
+        showReturnHomeButton();
+      });
+    }
+
+    function showReturnHomeButton() {
+      // Intentionally left blank — 'Return to Games' button removed per request.
+      return;
+    }
+
+    function giveReward() {
+      fetch(scriptURL + "?rewards=" + encodeURIComponent(code))
+        .then(res => res.json())
+        .then(data => {
+          let currentRewards = Array.isArray(data.rewards) ? data.rewards : (data.rewards ? data.rewards.split(",") : []);
+          let available = animals.filter(a => !currentRewards.includes(a));
+          if (available.length === 0) {
+            document.getElementById("uploadStatus").innerText = "You've collected all the animals! 🎉";
+            showReturnHomeButton();
+            return;
+          }
+          currentReward = available[Math.floor(Math.random() * available.length)];
+          document.getElementById("rewardModal").style.display = "block";
+          document.getElementById("rewardDisplay").innerText = "🎁";
+          document.getElementById("rewardMessage").innerText = "Click the present to reveal your reward!";
+          document.getElementById("rewardButtons").style.display = "none";
+          fetch(scriptURL, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify({ code: code, reward: currentReward }),
+            headers: { "Content-Type": "application/json" }
+          });
+        })
+        .catch(err => {
+          console.error("Reward error:", err);
+          document.getElementById("uploadStatus").innerText = "⚠️ There are no rewards for this activity.";
+          showReturnHomeButton();
+        });
+    }
+
+    function revealReward() {
+      document.getElementById("rewardDisplay").innerText = currentReward;
+      document.getElementById("rewardDisplay").style.animation = "wiggle 2s infinite";
+      document.getElementById("rewardMessage").innerText = "🎉 You earned a new animal friend! 🎉";
+      document.getElementById("rewardButtons").style.display = "block";
+      document.getElementById("rewardDisplay").onclick = null;
+      document.getElementById("rewardDisplay").style.cursor = "default";
+    }
+
+    function closeRewardModal() {
+      document.getElementById("rewardModal").style.display = "none";
+      showReturnHomeButton();
+    }
+
+    // Initialize game
+    document.addEventListener("DOMContentLoaded", () => {
+      const checkAuth = setInterval(() => {
+        if (window.jandoAuth && jandoAuth.isAuthenticated()) {
+          const user = jandoAuth.getCurrentUser();
+          const gameYearLevel = "6";
+          const userYear = user.yearLevel || user.year || user.Year || user['Year Level'] || user.grade || user.Grade;
+          if (userYear) {
+            const userYearNumber = userYear.toString().replace(/[^0-9]/g, '');
+            if (userYearNumber !== gameYearLevel) {
+              showAccessDeniedMessage(userYearNumber, gameYearLevel);
+              clearInterval(checkAuth);
+              return;
+            }
+          }
+          code = user.code;
+          studentName = user.name;
+          startGame();
+          clearInterval(checkAuth);
+        }
+      }, 100);
+
+      function showAccessDeniedMessage(userYear, gameYear) {
+        document.getElementById("loading").style.display = "none";
+        const instructionsArea = document.getElementById("instructionsArea");
+        if (instructionsArea) {
+          instructionsArea.innerHTML = `
+            <div style="text-align: center; padding: 3rem 2rem; background: var(--white); border-radius: 1rem; box-shadow: var(--shadow-lg); max-width: 600px; margin: 2rem auto;">
+              <div style="font-size: 4rem; margin-bottom: 1rem;">🚫</div>
+              <h2 style="color: var(--accent-red); margin-bottom: 1rem;">Access Restricted</h2>
+              <p style="color: var(--gray-700); line-height: 1.6; margin-bottom: 1.5rem;">
+                This is a Year ${gameYear} game, but you're registered as a Year ${userYear} student.
+              </p>
+              <p style="color: var(--gray-600); margin-bottom: 2rem;">
+                You can only access games designed for your year level.
+              </p>
+              <a href="games.html" style="
+                display: inline-block;
+                background: var(--orange);
+                color: var(--white);
+                text-decoration: none;
+                padding: 1rem 2rem;
+                border-radius: 0.5rem;
+                font-weight: 600;
+                transition: all 0.3s ease;
+              ">← Back to Your Games</a>
+            </div>
+          `;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
